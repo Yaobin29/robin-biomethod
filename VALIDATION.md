@@ -16,7 +16,7 @@ Date:2026-10-20. Independent implementation, not a Google or OpenAI benchmark re
 | Material-neutral routing | Synthetic second-material fixture passed; not chemical-transfer evidence |
 | Additional model sessions | ZERO; no real INV/DOM optimization was claimed |
 | Wet-lab validation / synthesis improvement | Not performed / not established |
-| Linux | CI configured, not run |
+| GitHub Linux + macOS, Python3.12 +3.13 | All four CI jobs passed, 62 tests per job |
 | Public repository | https://github.com/Yaobin29/robin-biomethod |
 
 The62tests comprise28inherited runtime/core tests and34product tests, covering provenance,
@@ -42,3 +42,5 @@ No personal Notion database, credential, private paper, global skill package or 
 dialysis calculator was included. Public excerpts retain CC BY4.0 attribution in NOTICE.
 Optional Zotero/OpenDataLoader backends were not exercised; text input remains standalone.
 The original Robinharness source, global model configuration and governance were not edited.
+
+Cross-platform evidence: [Actions run39365539578](https://github.com/Yaobin29/robin-biomethod/actions/runs/39365539578), code commit d5bd510e3be430f265cfdd02474d656706c5df8c. Direct GitHub installation, the offline demo and62tests also passed in an isolated local home.
