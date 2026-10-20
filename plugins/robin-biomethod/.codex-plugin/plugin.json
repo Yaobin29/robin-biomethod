@@ -1,0 +1,21 @@
+{
+  "name": "robin-biomethod",
+  "version": "0.1.0",
+  "description": "Evidence-grounded biomaterial synthesis methods and minimal validation experiments using Harness2.",
+  "author": {
+    "name": "Yaobin Wu"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RobinBioMethod",
+    "shortDescription": "Design biomaterial synthesis methods with traceable evidence",
+    "longDescription": "Literature discovery, method extraction, material-scoped reasoning, and source-grounded candidate methods with discriminating validation experiments.",
+    "category": "Developer Tools",
+    "developerName": "Yaobin Wu"
+  },
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/biomethod-setup/SKILL.md"
+    }
+  }
+}

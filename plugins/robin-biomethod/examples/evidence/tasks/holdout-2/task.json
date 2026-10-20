@@ -1,0 +1,10 @@
+{
+  "id": "holdout-2",
+  "domain": "scientific-evidence",
+  "work": "extract source-grounded claims from scientific materials",
+  "source_dir": "source",
+  "base_harness": "base",
+  "prompt_file": "prompt.txt",
+  "output": "evidence.json",
+  "evaluator": "evidence-v1"
+}

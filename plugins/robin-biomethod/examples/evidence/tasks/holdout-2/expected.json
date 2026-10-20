@@ -1,0 +1,26 @@
+{
+  "C1": {
+    "status": "supported",
+    "locators": [
+      "M1"
+    ]
+  },
+  "C2": {
+    "status": "not_reported",
+    "locators": [
+      "M2"
+    ]
+  },
+  "C3": {
+    "status": "not_reported",
+    "locators": [
+      "S1"
+    ]
+  },
+  "C4": {
+    "status": "supported",
+    "locators": [
+      "S2"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "source_hash": "677e6a8f345722b320991e87c1237a268b2757b7f93f5067e09ae21c03b037ea",
+  "status": "prepared",
+  "model_calls": 0,
+  "evidence_scope": "closed supplied source set; public search provenance only when registry.search is supplied"
+}

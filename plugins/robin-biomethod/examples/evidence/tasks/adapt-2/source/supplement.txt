@@ -1,0 +1,2 @@
+[S1] The perfusion experiment used water containing dye; it did not measure oxygen delivery.
+[S2] The test lasted ten minutes.

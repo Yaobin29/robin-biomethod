@@ -1,0 +1,13 @@
+{
+  "id": "generic-biomaterial-synthesis-v1",
+  "checks": [
+    "Define the target metric, assay, scale basis and constraints before proposing a route.",
+    "Verify precursor identity, relevant batch properties, reaction mechanism, order of addition, medium, concentration, pH, temperature and time when applicable; mark inapplicable fields rather than invent values.",
+    "Distinguish material synthesis from subsequent formulation, crosslinking, device fabrication and biological validation.",
+    "Preserve each route's conditions, purification, storage and characterization as a coherent evidence-backed chain.",
+    "Separate reported conditions, arithmetic scaling, extrapolations and experimental proposals.",
+    "Verify purification endpoints and fit-for-purpose characterization rather than treating elapsed time or appearance as proof.",
+    "Link every critical uncertainty to a discriminating experiment with controls, independent batches and a decision rule.",
+    "Select applicable hazard controls from primary safety information and local laboratory procedures; never invent a validated safety assessment."
+  ]
+}

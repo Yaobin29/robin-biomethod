@@ -1,0 +1,10 @@
+{
+  "id": "gelma-677e6a8f34",
+  "domain": "biomaterial-synthesis/gelma",
+  "work": "design evidence-grounded biomaterial synthesis methods AND minimal discriminating validation experiments",
+  "prompt_file": "prompt.txt",
+  "source_dir": "source",
+  "base_harness": "base",
+  "output": "method.json",
+  "evaluator": "biomethod-v1"
+}

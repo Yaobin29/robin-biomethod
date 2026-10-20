@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "material": "GelMA",
+  "status": "draft_missing_evidence",
+  "origin": "host-curated example; no model optimization performed",
+  "target_assessment": {
+    "status": "unvalidated",
+    "reason": "Neither selected route establishes the hypothetical target in the intended lot, scale and assay."
+  },
+  "evidence_limitations": [
+    "Closed two-paper excerpt set; supplements and prior-method details remain unread.",
+    "Exact quote checks demonstrate provenance, not correct chemical interpretation.",
+    "Source DS definitions and primary-amine conversion are not automatically interchangeable."
+  ],
+  "uncertainties": [
+    {
+      "id": "U1",
+      "question": "Which feed, under the chosen lot and assay, reaches the requested primary-amine conversion?",
+      "importance": "critical"
+    },
+    {
+      "id": "U2",
+      "question": "Which fully specified purification procedure reaches a qualified residual endpoint?",
+      "importance": "critical"
+    },
+    {
+      "id": "U3",
+      "question": "Which actual gelatin lot and route satisfy available resources?",
+      "importance": "critical"
+    }
+  ],
+  "candidate_methods": [
+    {
+      "id": "M-A",
+      "route_id": "route-A-2016",
+      "disposition": "candidate_draft",
+      "inputs": [
+        "Route A: type A 175-bloom gelatin; actual lot must be confirmed",
+        "CB buffer and methacrylic anhydride per source; local chemical hazard review required",
+        "Temperature-controlled stirring, pH meter; dialysis and lyophilization equipment"
+      ],
+      "steps": [
+        {
+          "action": "Review and prepare route-specific precursor and buffer",
+          "parameters": [
+            {
+              "name": "gelatin_type",
+              "value": "type A, 175 bloom",
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "type A gelatin (175 bloom)"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "buffer_molarity",
+              "value": 0.25,
+              "unit": "M",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "CB buffer at 0.25 M"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "initial_pH",
+              "value": 9,
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "pH 9"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "gelatin_concentration",
+              "value": 10,
+              "unit": "g/100 mL",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "gelatin concentration at 10 w/v%"
+                }
+              ],
+              "origin": "reported"
+            }
+          ]
+        },
+        {
+          "action": "Reference reaction conditions, not a guaranteed target70 recipe",
+          "parameters": [
+            {
+              "name": "MAA_feed",
+              "value": 0.1,
+              "unit": "mL/g gelatin",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "0.1 mL per gram of gelatin"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "reaction_temperature",
+              "value": 50,
+              "unit": "degC",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "reaction temperature at 50 °C"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "reaction_time",
+              "value": 3,
+              "unit": "h",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "reaction time for 3 h"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "stirring",
+              "value": 500,
+              "unit": "rpm",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "500 rpm"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "MAA_reference_volume_at_5g",
+              "value": 0.5,
+              "unit": "mL",
+              "origin": "calculated",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "0.1 mL per gram of gelatin"
+                }
+              ],
+              "expression": "0.1 * 5",
+              "assumptions": "Arithmetic scale-down at fixed mL/g feed; the 5g goal is hypothetical. Mixing and conversion equivalence are NOT demonstrated."
+            },
+            {
+              "name": "MAA_feed_for_target70",
+              "value": null,
+              "unit": "mL/g gelatin",
+              "origin": "unknown",
+              "reason": "Selected excerpts do not establish a feed giving70% primary-amine conversion under this lot and assay.",
+              "uncertainty_id": "U1",
+              "evidence": []
+            },
+            {
+              "name": "reference_final_solution_volume_at_5g",
+              "value": 50,
+              "unit": "mL",
+              "origin": "calculated",
+              "expression": "5 / 10 * 100",
+              "assumptions": "5g dry gelatin at10g/100mL FINAL solution; not an instruction to add50mL solvent; no proof of scale-transfer equivalence.",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "gelatin concentration at 10 w/v%"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "action": "Stop, purify, characterize and store",
+          "parameters": [
+            {
+              "name": "stop_pH",
+              "value": 7.4,
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "pH was readjusted to 7.4"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "dialysis_conditions",
+              "value": null,
+              "unit": "",
+              "origin": "unknown",
+              "reason": "Membrane, bath exchange, duration and residual endpoint must be sourced and approved; no GelMA-specific clearance model is bundled.",
+              "uncertainty_id": "U2",
+              "evidence": []
+            },
+            {
+              "name": "storage_temperature",
+              "value": -20,
+              "unit": "degC",
+              "evidence": [
+                {
+                  "document": "PMC4977492",
+                  "locator": "L0023",
+                  "quote": "stored at −20 °C"
+                }
+              ],
+              "origin": "reported"
+            }
+          ]
+        }
+      ],
+      "checkpoints": [
+        "Confirm lot and equipment before reaction; record actual pH and temperature trajectory.",
+        "Review original Methods, earlier referenced protocol and supplements before executing purification."
+      ],
+      "characterization": [
+        "Measure primary-amine conversion against same-lot gelatin with declared calibration and normalization.",
+        "Define and qualify a fit-for-purpose residual assay; no clearance or cell compatibility claim from elapsed dialysis time."
+      ],
+      "gaps": [
+        "70% target is an untested objective; reference feed is not a selected target-achieving feed.",
+        "Purification and source coverage remain incomplete.",
+        "Local SOP and reagent safety controls must be reviewed before execution."
+      ]
+    },
+    {
+      "id": "M-B",
+      "route_id": "route-B-2019",
+      "disposition": "reference_only",
+      "inputs": [
+        "Route B: type B 250-bloom gelatin",
+        "TFF system required in the source; absent in hypothetical lab"
+      ],
+      "steps": [
+        {
+          "action": "Retain routeB as comparator, not an executable substitute",
+          "parameters": [
+            {
+              "name": "gelatin_type",
+              "value": "type B, 250 bloom",
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "type B gelatin (10 g, 250 bloom"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "gelatin_mass",
+              "value": 10,
+              "unit": "g",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "type B gelatin (10 g"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "buffer_volume",
+              "value": 100,
+              "unit": "mL",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "0.25 M, 100 mL"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "buffer_molarity",
+              "value": 0.25,
+              "unit": "M",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "0.25 M"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "initial_pH",
+              "value": 9.4,
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "adjusted to 9.4"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "MAA_volume_for_DS60",
+              "value": 0.317,
+              "unit": "mL",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "0.317 mL for target DS = 60%"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "reaction_temperature",
+              "value": 55,
+              "unit": "degC",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "1 h at 55 °C"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "reaction_time",
+              "value": 1,
+              "unit": "h",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "1 h at 55 °C"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "stirring",
+              "value": 500,
+              "unit": "rpm",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "500 rpm"
+                }
+              ],
+              "origin": "reported"
+            },
+            {
+              "name": "purification",
+              "value": "TFF",
+              "unit": "",
+              "evidence": [
+                {
+                  "document": "PMC6499775",
+                  "locator": "L0051",
+                  "quote": "tangential flow filtration (TFF) system"
+                }
+              ],
+              "origin": "reported"
+            }
+          ]
+        }
+      ],
+      "checkpoints": [
+        "Exclude from current execution because TFF is unavailable."
+      ],
+      "characterization": [
+        "Source DS60 assay definitions must not be equated with primary-amine conversion70."
+      ],
+      "gaps": [
+        "Different precursor, target definition and equipment; no automatic substitution."
+      ]
+    }
+  ],
+  "constraint_assessments": [
+    {
+      "id": "C1",
+      "status": "violated",
+      "reason": "RouteB requires unavailable TFF and is retained only as reference; no silent purification substitution."
+    },
+    {
+      "id": "C2",
+      "status": "unknown",
+      "reason": "Actual gelatin type, bloom and lot must be confirmed; routesA/B differ."
+    }
+  ],
+  "validation_experiments": [
+    {
+      "id": "E1",
+      "method_ids": [
+        "M-A"
+      ],
+      "uncertainty_ids": [
+        "U1",
+        "U2",
+        "U3"
+      ],
+      "hypothesis": "After resolving source and equipment gaps, a bounded same-lot feed calibration plus endpoint-based purification can identify a candidate meeting the stated analytical target.",
+      "controls": [
+        "Same-lot unmodified gelatin for amine baseline",
+        "Reagent blank and independently prepared calibration standards",
+        "Reference-feed comparator from route A; any bracketing feeds are proposals selected only after source and hazard review",
+        "Qualified residual-assay blank, recovery check and time-course samples"
+      ],
+      "independent_batches": 3,
+      "technical_repeats": 2,
+      "sample_size_rationale": "Proposed pilot minimum per selected condition, not a power calculation or proof of reproducibility; adapt after estimating between-batch variance.",
+      "sampling": "First resolve U3 and retrieve/approve missing purification information; then prepare separately initiated batches with recorded allocation/order. Assay each purified batch and planned purification fractions; technical repeats are nested within batches.",
+      "readouts": [
+        {
+          "metric": "primary-amine conversion",
+          "method": "Calibrated TNBS assay with same-lot unmodified gelatin reference; analytical specificity and normalization require review",
+          "unit": "%",
+          "acceptance": "65–75% is the hypothetical target interval, considered together with calibration quality and uncertainty; predefine the batch-level decision.",
+          "acceptance_basis": "Hypothetical user-target fixture70±5 percentage points, not a literature-validated tolerance"
+        },
+        {
+          "metric": "residual contaminants",
+          "method": "Qualified analyte-specific assay selected after identifying relevant residuals; validate matrix recovery and sensitivity.",
+          "unit": "assay-specific concentration",
+          "acceptance": "No numerical release limit is established; define a justified limit before calling purification complete.",
+          "acceptance_basis": "Unresolved method-development requirement; cannot pass this gate yet"
+        }
+      ],
+      "predicted_result": "Some tested feed may fall within the target interval, but no value is promised; purification fractions should permit a measured endpoint assessment.",
+      "falsification": "No tested condition meets the target within uncertainty, controls fail, or required residual endpoint cannot be established/met.",
+      "decision_rule": "If inputs and assays are qualified and all prespecified criteria pass, retain a candidate for expanded validation. If target misses, revise the bounded feed study. If residual limits or controls remain unresolved, stop at draft and resolve the assay/source gap; never infer purity from appearance or time."
+    }
+  ]
+}

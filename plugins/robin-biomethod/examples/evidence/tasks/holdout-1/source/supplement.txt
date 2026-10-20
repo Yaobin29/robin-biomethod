@@ -1,0 +1,2 @@
+[S1] Fluorescence was normalized to image area, not to cell number.
+[S2] A final correction reports no increase in fluorescence after background subtraction, superseding M2.

@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/Yaobin29/robinharness",
+  "commit": "3ff1cf3652cc7bd5612a82de714c86c73cd78b04",
+  "license": "Apache-2.0",
+  "changes": "Independent state directory; biomethod task adapter hooks; domain-specific assessment prevents scientific auto-adoption."
+}

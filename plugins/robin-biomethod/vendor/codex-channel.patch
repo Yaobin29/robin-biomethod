@@ -1,0 +1,11 @@
+--- a/harness2/core/spec.py
++++ b/harness2/core/spec.py
+@@ -30,7 +30,7 @@
+ 
+ ModelId = str
+ 
+-CHANNELS = ("claude_cli", "opencode")
++CHANNELS = ("claude_cli", "opencode", "codex_cli")
+ 
+ 
+ @dataclass(frozen=True)

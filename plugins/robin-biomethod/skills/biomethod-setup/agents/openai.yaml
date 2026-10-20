@@ -1,0 +1,6 @@
+interface:
+  display_name: "RobinBioMethod Setup"
+  short_description: "Initialize and check the biomaterial method plugin"
+  default_prompt: "Use $biomethod-setup to check RobinBioMethod without making model calls."
+policy:
+  allow_implicit_invocation: true

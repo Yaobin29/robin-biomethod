@@ -1,0 +1,3 @@
+[M1] The summary states that cell proliferation increased.
+[M2] Fluorescence intensity was higher in the treatment group.
+[M3] Cell proliferation was not directly measured.

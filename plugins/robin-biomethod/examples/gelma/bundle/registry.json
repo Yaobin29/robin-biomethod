@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "id": "PMC4977492",
+      "title": "Precise Tuning of Facile One-Pot Gelatin Methacryloyl (GelMA) Synthesis",
+      "doi": "10.1038/srep31036",
+      "url": "https://europepmc.org/articles/PMC4977492",
+      "access": "curated_excerpt",
+      "license": "CC BY 4.0; authors of the cited article; excerpted from Europe PMC full text; no wording changes",
+      "retrieved": "2026-10-20T03:25:49.253475+00:00",
+      "role": "core-method",
+      "text_file": "documents/PMC4977492.txt",
+      "sha256": "59a12ccba682ff1ddf62263f105a6500249cd838f735af8669c399170252465e",
+      "supplement_links": [
+        "srep31036-s1.pdf"
+      ],
+      "supplement_status": "not retrieved; source excerpt explicitly incomplete"
+    },
+    {
+      "id": "PMC6499775",
+      "title": "Gelatin methacryloyl and its hydrogels with an exceptional degree of controllability and batch-to-batch consistency",
+      "doi": "10.1038/s41598-019-42186-x",
+      "url": "https://europepmc.org/articles/PMC6499775",
+      "access": "curated_excerpt",
+      "license": "CC BY 4.0; authors of the cited article; excerpted from Europe PMC full text; no wording changes",
+      "retrieved": "2026-10-20T03:25:53.138045+00:00",
+      "role": "core-method",
+      "text_file": "documents/PMC6499775.txt",
+      "sha256": "6e22879a676d3f7744244759031a6db512ed33a46d85c6747dea429fb6ed4f5f",
+      "supplement_links": [
+        "41598_2019_42186_MOESM1_ESM.docx"
+      ],
+      "supplement_status": "not retrieved; source excerpt explicitly incomplete"
+    }
+  ],
+  "errors": [],
+  "search": null,
+  "coverage": "Two deliberately selected open-access method examples, not a systematic search. Excerpts omit supplements and other sections."
+}

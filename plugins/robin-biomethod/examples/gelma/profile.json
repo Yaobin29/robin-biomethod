@@ -1,0 +1,11 @@
+{
+  "id": "example-gelma-v1",
+  "checks": [
+    "GelMA example only; do not load this profile for another material.",
+    "Differentiate primary-amine conversion from total methacryloyl content and hydroxyl substitution.",
+    "Do not interpolate reagent feed to promise a target conversion; design a calibration pilot.",
+    "Check gelatin type/bloom/lot, buffer, pH, feed, temperature/time, purification and assay as a coherent route.",
+    "Do not substitute hydrogel modulus for chemical functionalization measurements.",
+    "Keep synthesis distinct from later photocuring and cell testing."
+  ]
+}

@@ -1,0 +1,266 @@
+[
+  {
+    "id": "route-A-2016",
+    "document": "PMC4977492",
+    "name": "2016 type-A CB-buffer route",
+    "parameters": [
+      {
+        "name": "gelatin_type",
+        "value": "type A, 175 bloom",
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "type A gelatin (175 bloom)"
+          }
+        ]
+      },
+      {
+        "name": "buffer_molarity",
+        "value": 0.25,
+        "unit": "M",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "CB buffer at 0.25 M"
+          }
+        ]
+      },
+      {
+        "name": "initial_pH",
+        "value": 9,
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "pH 9"
+          }
+        ]
+      },
+      {
+        "name": "gelatin_concentration",
+        "value": 10,
+        "unit": "g/100 mL",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "gelatin concentration at 10 w/v%"
+          }
+        ]
+      },
+      {
+        "name": "MAA_feed",
+        "value": 0.1,
+        "unit": "mL/g gelatin",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "0.1 mL per gram of gelatin"
+          }
+        ]
+      },
+      {
+        "name": "reaction_temperature",
+        "value": 50,
+        "unit": "degC",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "reaction temperature at 50 °C"
+          }
+        ]
+      },
+      {
+        "name": "reaction_time",
+        "value": 3,
+        "unit": "h",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "reaction time for 3 h"
+          }
+        ]
+      },
+      {
+        "name": "stirring",
+        "value": 500,
+        "unit": "rpm",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "500 rpm"
+          }
+        ]
+      },
+      {
+        "name": "stop_pH",
+        "value": 7.4,
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "pH was readjusted to 7.4"
+          }
+        ]
+      },
+      {
+        "name": "storage_temperature",
+        "value": -20,
+        "unit": "degC",
+        "evidence": [
+          {
+            "document": "PMC4977492",
+            "locator": "L0023",
+            "quote": "stored at −20 °C"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "Standard protocol is 3 h; kinetics observation at 1 h does not silently replace the reported protocol.",
+      "Dialysis conditions and details inherited from earlier work are incomplete in these excerpts.",
+      "Target 70% conversion is not established for the selected standard feed."
+    ]
+  },
+  {
+    "id": "route-B-2019",
+    "document": "PMC6499775",
+    "name": "2019 type-B route with TFF, DS60 reference",
+    "parameters": [
+      {
+        "name": "gelatin_type",
+        "value": "type B, 250 bloom",
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "type B gelatin (10 g, 250 bloom"
+          }
+        ]
+      },
+      {
+        "name": "gelatin_mass",
+        "value": 10,
+        "unit": "g",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "type B gelatin (10 g"
+          }
+        ]
+      },
+      {
+        "name": "buffer_volume",
+        "value": 100,
+        "unit": "mL",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "0.25 M, 100 mL"
+          }
+        ]
+      },
+      {
+        "name": "buffer_molarity",
+        "value": 0.25,
+        "unit": "M",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "0.25 M"
+          }
+        ]
+      },
+      {
+        "name": "initial_pH",
+        "value": 9.4,
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "adjusted to 9.4"
+          }
+        ]
+      },
+      {
+        "name": "MAA_volume_for_DS60",
+        "value": 0.317,
+        "unit": "mL",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "0.317 mL for target DS = 60%"
+          }
+        ]
+      },
+      {
+        "name": "reaction_temperature",
+        "value": 55,
+        "unit": "degC",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "1 h at 55 °C"
+          }
+        ]
+      },
+      {
+        "name": "reaction_time",
+        "value": 1,
+        "unit": "h",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "1 h at 55 °C"
+          }
+        ]
+      },
+      {
+        "name": "stirring",
+        "value": 500,
+        "unit": "rpm",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "500 rpm"
+          }
+        ]
+      },
+      {
+        "name": "purification",
+        "value": "TFF",
+        "unit": "",
+        "evidence": [
+          {
+            "document": "PMC6499775",
+            "locator": "L0051",
+            "quote": "tangential flow filtration (TFF) system"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "Reported DS60 is not the requested primary-amine conversion target70.",
+      "Requires TFF unavailable in the hypothetical lab.",
+      "Type B differs from route A; do not mix the gelatin or reaction conditions."
+    ]
+  }
+]

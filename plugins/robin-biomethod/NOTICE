@@ -1,0 +1,14 @@
+RobinBioMethod is an independent project by Yaobin Wu, not an official Google/OpenAI product.
+Apache-2.0 applies to product source and the bundled code under its respective notices.
+Includes Google Research Harness2 (pinned commit in vendor/UPSTREAM.json), patched only
+for the codex_cli channel. Copyright Google LLC; upstream Apache-2.0 license retained.
+Includes adapted Robinharness code (pinned commit in vendor/ROBINHARNESS.json), Apache-2.0.
+Example article excerpts are separately licensed CC BY4.0, NOT relicensed as Apache-2.0:
+Shirahama H., Lee B.H., Tan L.P., Cho N.J. (2016), Scientific Reports6,31036.
+DOI10.1038/srep31036; https://europepmc.org/articles/PMC4977492
+Zhu M. et al. (2019), Scientific Reports9,6863. DOI10.1038/s41598-019-42186-x;
+https://europepmc.org/articles/PMC6499775
+License: https://creativecommons.org/licenses/by/4.0/
+Selected text paragraphs were excerpted and prefixed with source locators/section labels.
+The example method/experiment is a new curated interpretation with explicit gaps, not a
+procedure validated by the article authors or by this product. No article images included.

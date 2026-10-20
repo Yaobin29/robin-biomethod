@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+auth.json
+runs/
+local-runtime/
+*.zip
+.DS_Store

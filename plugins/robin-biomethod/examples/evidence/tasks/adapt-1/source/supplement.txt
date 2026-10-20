@@ -1,0 +1,2 @@
+[S1] A correction supersedes the main stiffness table: control 8 kPa and treatment 8 kPa; there was no increase.
+[S2] Each group contains three independent specimens.

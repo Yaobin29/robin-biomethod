@@ -1,0 +1,6 @@
+Read every supplied file in source/. Determine the status of each requested claim against the supplied evidence. A final correction supersedes earlier text. Use supported, contradicted, or not_reported. Do not turn unmeasured endpoints into negative experimental findings.
+Write output/evidence.json as one JSON object with claims: an array. Each row must contain id, claim, status, citations, and uncertainty. Each citation must contain source (filename), locator (the bracketed identifier without brackets), and quote (an exact nonempty substring of that source line). Cite all source locations needed to explain a disagreement. Return all requested claims exactly once.
+Requested claims:
+C1: Higher fluorescence supports a treatment effect after correction.
+C2: Treatment increased cell proliferation.
+C3: Normalization used image area.

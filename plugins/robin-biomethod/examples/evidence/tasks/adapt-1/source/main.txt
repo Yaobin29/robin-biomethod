@@ -1,0 +1,3 @@
+[M1] The abstract states that treatment doubled stiffness.
+[M2] The main results report stiffness of 8 kPa for control and 16 kPa for treatment.
+[M3] Viability was not measured in this study.

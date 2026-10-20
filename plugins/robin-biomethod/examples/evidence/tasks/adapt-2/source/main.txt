@@ -1,0 +1,3 @@
+[M1] The abstract describes perfusable channels.
+[M2] A dye passed through the fabricated channels.
+[M3] No endothelial cells were used in this experiment.

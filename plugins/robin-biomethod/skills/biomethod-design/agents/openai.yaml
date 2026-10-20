@@ -1,0 +1,6 @@
+interface:
+  display_name: "RobinBioMethod Design"
+  short_description: "Evidence-grounded synthesis method and minimal validation"
+  default_prompt: "Use $biomethod-design to define my synthesis target, retrieve methods, and draft candidates with minimal validation experiments."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "material": "GelMA",
+  "application": "Hypothetical acellular material synthesis pilot; not a real lab instruction",
+  "target": {
+    "metric": "primary-amine conversion",
+    "value": 70,
+    "tolerance": 5,
+    "unit": "%",
+    "definition": "100 * (1 - remaining primary amines / primary amines in same-lot unmodified gelatin), normalized on a declared mass basis; not total methacryloyl DS",
+    "assay": "Calibrated TNBS assay with same-lot unmodified gelatin reference; analytical specificity and normalization require review"
+  },
+  "scale": {
+    "value": 5,
+    "unit": "g",
+    "basis": "initial dry gelatin feed, not final purified product"
+  },
+  "available_equipment": [
+    "temperature-controlled stirring",
+    "pH meter",
+    "dialysis apparatus",
+    "lyophilizer",
+    "access to calibrated colorimetric assay"
+  ],
+  "constraints": [
+    {
+      "id": "C1",
+      "kind": "hard",
+      "description": "No TFF system is available; do not silently substitute dialysis as a reported route."
+    },
+    {
+      "id": "C2",
+      "kind": "hard",
+      "description": "Confirm actual gelatin type, bloom and lot before committing a route."
+    }
+  ],
+  "unknowns": [
+    "Gelatin lot not selected",
+    "Purification endpoint assay and release criteria not established"
+  ],
+  "scenario": "illustrative, not user-supplied laboratory constraints"
+}
