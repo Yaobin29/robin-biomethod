@@ -1,3 +1,31 @@
+# Validation — RobinBioMethod 0.2.0 (unreleased)
+
+The full-workflow fix is under acceptance. Offline tests are implementation evidence,
+not proof of scientific reasoning or a completed live workflow.
+
+- macOS Python3.12 and3.13:93 offline regression tests passed on each.
+- Source package privacy scan passed; isolated native0.2.0 installation/discovery passed.
+- HAMA acceptance: original native discovery, screening and one full text succeeded;
+  extraction failed with CLI workspace out-of-credits. No original core stage ran.
+- A bounded recovery reuses that registered evidence, explicitly marking external input.
+  Prior attempts remain recorded; no new allowance is silently invented.
+- Recovery extraction succeeded with real model transport; first core baseline hit the
+  old180second per-session cap. The wrapper now allows600seconds within the shared
+  wall deadline and verifies frozen preparation before starting a new core tree.
+- Original baseline, INV proposal and DOM proposal ran with actual CLI traces.
+  DOM execution removed the baseline arithmetic syntax errors; remaining prerequisite
+  coverage is kept visible. This is document-level progress, not scientific efficacy.
+- Delivery contract repair is separately audited and cannot modify original scientific
+  parameters, evidence or uncertainty. Source/approval gaps remain blocked.
+- AGG rule composition completed, but the final execution returned workspace out-of-credits;
+  no final artifact or reflection existed. Three successful stage methods and all rule edits
+  are preserved. A guarded final-only continuation uses native upstream functions.
+- Release and installation are gated on real full-workflow acceptance, including natural
+  design-request routing, original stage traces, artifacts and final document checks.
+- Existing 0.1.0 installation and public main remain distinct from this unreleased source.
+
+## Historical 0.1.0 validation
+
 # Validation — RobinBioMethod 0.1.0
 
 Date:2026-10-20. Independent implementation, not a Google or OpenAI benchmark result.

@@ -23,5 +23,13 @@ JSON contract:
     "readouts":[{"metric":"observable","method":"assay","unit":"unit","acceptance":"criterion","acceptance_basis":"user target OR proposed pilot criterion OR cited source"}],
     "predicted_result":"prediction","falsification":"what would refute it","decision_rule":"actions for pass/fail/inconclusive"}]
 }
+For calculated parameters expression is numeric arithmetic only, e.g. "25 * (500 / 250)";
+put units and scaling assumptions separately. Every critical uncertainty id must be addressed
+by at least one discriminating validation experiment, even when the result remains unknown.
+External decisions (tolerance, equipment qualification, hazard approval) belong in explicit
+prerequisites/stop conditions of the relevant experiments, with their uncertainty IDs.
+Never claim that a lab experiment resolves a preference or grants approval.
 Counts shown above illustrate fields, not a universal sample-size prescription.
 Do not assert achieved chemistry or safety from documentation checks. Include hazard-control review gaps.
+
+Before finishing run `python3 scripts/check_method.py output/method.json`, fix any contract/provenance errors, and reopen the final file. This helper is a public contract check, not an experimental validity test.

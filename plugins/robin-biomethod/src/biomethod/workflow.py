@@ -39,6 +39,8 @@ def validate_goal(goal):
     for key in ("material", "application"):
         if not isinstance(goal.get(key), str) or not goal[key].strip():
             raise ValueError(f"Goal needs {key}.")
+    if not isinstance(goal.get("unknown_fields", []), list) or any(not isinstance(x, str) for x in goal.get("unknown_fields", [])):
+        raise ValueError("unknown_fields must be an array of field names.")
     target = goal.get("target", {})
     if not isinstance(target, dict):
         raise ValueError("Goal target must be an object.")
@@ -46,9 +48,11 @@ def validate_goal(goal):
         if not isinstance(target.get(key), str) or not target[key].strip():
             raise ValueError(f"Clarify target.{key} before preparation.")
     for key in ("value", "tolerance"):
+        if key == "tolerance" and key in target and target.get(key) is None and "target.tolerance" in goal.get("unknown_fields", []):
+            continue
         if not isinstance(target.get(key), (int, float)) or isinstance(target[key], bool) or not math.isfinite(target[key]):
             raise ValueError(f"target.{key} must be numeric.")
-    if target["tolerance"] < 0:
+    if target["tolerance"] is not None and target["tolerance"] < 0:
         raise ValueError("Target tolerance cannot be negative.")
     scale = goal.get("scale", {})
     if not isinstance(scale, dict) or not isinstance(scale.get("value"), (int, float)) or isinstance(scale["value"], bool) or not math.isfinite(scale["value"]) or scale["value"] <= 0 or not scale.get("unit") or not scale.get("basis"):

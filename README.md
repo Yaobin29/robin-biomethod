@@ -29,7 +29,7 @@ Repository: https://github.com/Yaobin29/robin-biomethod
 
 Open a new chat; invoke $biomethod-setup or $biomethod-design. In the skill picker, these
 may appear as robin-biomethod:biomethod-setup / robin-biomethod:biomethod-design.
-The narrowly triggered skills do not start optimization for ordinary research.
+Material-method design requests default to the full bounded workflow. Ordinary paper summaries do not trigger optimization.
 
 All commands below use the entry point from the repository root:
 
@@ -44,10 +44,25 @@ Use your Python3.12/3.13 executable. There is no required global Robin skill ins
 2. Search public metadata, select papers, acquire actual Methods and supplements, then
    extract cited route-specific method cards. Discovery summaries alone are insufficient.
 3. Freeze goal, registered evidence, method cards and a material-specific profile if needed.
-4. Draft in the host conversation, assess and render; or explicitly request a bounded
-   real Harness² trial. These are different operations and must be labeled correctly.
+4. Execute the single `design` entry: extraction, frozen inputs, original Harness² baseline,
+   INV, DOM, AGG, selection and reflection. Only explicit draft-only requests skip model execution.
 5. Deliver candidates, conflicts, unknowns and minimal experiments. Human review and
    laboratory evidence are required before calling a synthesis successful.
+
+The default product entry is:
+
+    python3.12 plugins/robin-biomethod/scripts/biomethod.py design --goal goal.json \
+      --query 'material synthesis' --run-dir /path/to/new-private-job
+
+`configure --session-limit 16 --minutes 45 --k 1` saves configurable limits;
+`design --dry-run` plans without model calls, and `status /path/to/job` shows actual progress.
+All preparation, retries and core calls share one budget. Execution evidence must verify
+before completion is claimed. The report links baseline/INV/DOM/AGG artifacts and rule edits.
+For k=1, selection delivers the single final candidate without a comparative model call.
+Failures preserve their stage and budget; no ordinary chat recipe substitutes for execution.
+See [full workflow](plugins/robin-biomethod/references/full-workflow.md).
+
+The following lower-level commands are for evidence preparation or troubleshooting:
 
 For brevity, set BM to the entry point when following these examples in your shell:
 

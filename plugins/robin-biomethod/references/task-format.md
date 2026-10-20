@@ -58,7 +58,8 @@ cannot verify the truth of every interpretation, dimensional assumption, biologi
 claim or proposed acceptance threshold. A perfect document score is not scientific
 success. Critical conditions or hard constraints unresolved => draft_missing_evidence.
 
-A model trial is a separate explicit action:
+The default `design --goal goal.json` entry includes the bounded model workflow.
+For an already frozen task, the lower-level core command is:
 
     python3 scripts/biomethod.py run --task new-task/task.json \
       --holdout other-task/task.json --session-limit 16 --minutes 45
@@ -66,5 +67,7 @@ A model trial is a separate explicit action:
 Prepare holdouts before the run. Changing only a task id, duplicating the same problem
 or lightly rephrasing a source is not scientific independence. Never use holdouts as
 editing context or let a candidate rewrite the evaluator. User confirms model budget.
-The inherited engine has hard caps24sessions/60minutes. Defaults here are16/45.
+Positive finite budgets are configurable; defaults are16sessions/45minutes.
+An unresolved tolerance may be null when target.tolerance is listed in unknown_fields;
+any declared unknown forces draft_missing_evidence.
 No adopt command is exposed: documentation improvement cannot authorize scientific use.

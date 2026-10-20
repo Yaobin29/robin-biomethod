@@ -21,3 +21,5 @@ hypothesis, readouts, controls, prediction, falsification and the next action fo
 Use draft_missing_evidence when key conditions or hard constraints remain unresolved.
 Keep competing routes when evidence cannot choose; never force agreement or a merged recipe.
 Reopen the JSON and check ids, units, evidence references and uncertainty coverage before finishing.
+
+Run `python3 scripts/check_method.py output/method.json` and fix its errors before delivery. Keep reported parameter names/values/units identical to the frozen route card. Unknown fields in goal.json force draft_missing_evidence and need explicit uncertainty coverage.

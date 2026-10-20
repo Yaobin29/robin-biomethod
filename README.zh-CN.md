@@ -43,9 +43,21 @@ robin-biomethod:biomethod-setup／robin-biomethod:biomethod-design。
 检索在优化循环之前完成。目标和证据冻结后再公平比较，模型执行期间不联网补证。
 具体参数属于本次任务证据；不能直接变成跨材料通用规则。
 
-可以只在当前聊天中撰写有证据的方法，再调用检查和报告工具。要运行原库真实
-INV／DOM 试验，需明确提出并确定预算；程序不会把普通写方法请求自动变成模型试验。
-默认16会话／45分钟，失败和重试也计入；不提供科学方法自动采用命令。
+材料方法设计默认进入完整流程，不需要额外说出 Harness²、INV 或 DOM。
+明确要求“仅草稿／不运行模型”时才走轻量路径。安装入口同时收到设计请求，会转交设计入口。
+
+    python3.12 plugins/robin-biomethod/scripts/biomethod.py design --goal goal.json \
+      --query '材料合成检索词' --run-dir /新建的私有运行目录
+
+默认上限为16会话／45分钟，可通过 `configure --session-limit 16 --minutes 45` 调整。
+检索后的筛选、方法提取、核心调用和重试共用预算；会话数不等于 Codex 额度百分比。
+`design --dry-run` 只做计划，`status <运行目录>` 查看真实阶段。
+报告提供基线、INV、DOM、AGG 方法文件、规则修改决定、参数变化和实际用量。
+k=1 直接交付唯一最终候选，不声称另有模型比较选择。
+
+只有工作流完成且执行证据核验通过，才标记全流程完成。网络、额度或文档错误会保留失败阶段，
+不能以聊天草稿代替。未知允许偏差可明确记录为空值，候选仍须标记缺少证据。
+详细说明见 [完整流程](plugins/robin-biomethod/references/full-workflow.md)。
 
 ## 先看离线案例
 

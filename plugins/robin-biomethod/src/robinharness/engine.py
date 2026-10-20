@@ -150,6 +150,8 @@ class FileTaskAdapter:
                     shutil.copy2(out, dest)
             (rd / "trajectory.txt").write_text(result["trajectory"])
             (rd / "message.txt").write_text(result["text"])
+            dump(rd / "execution.json", dict(run_id=run_id, source_hash=self.source_hash,
+                 output_hash=fingerprint(rd / "output"), audit_index=result.get("audit_index")))
         return rd
 
     def delivered(self, run_dir):

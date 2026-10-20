@@ -12,6 +12,8 @@ from .research import search, collect, import_document, merge_collections
 from .workflow import prepare, read, validate_task_source, PLUGIN
 from .validation import assess
 from .reporting import render, compare
+from .pipeline import run_design, settings, configure, job_status
+from .execution import export_execution
 
 
 def main(argv=None):
@@ -19,6 +21,23 @@ def main(argv=None):
     p.add_argument('--version',action='version',version=__version__)
     sub=p.add_subparsers(dest='command',required=True)
     sub.add_parser('setup');sub.add_parser('doctor')
+    config=sub.add_parser('configure')
+    design=sub.add_parser('design')
+    design.add_argument('--goal',type=Path,required=True)
+    design.add_argument('--query',action='append',default=[])
+    design.add_argument('--bundle',type=Path)
+    design.add_argument('--prepared-from',type=Path)
+    design.add_argument('--run-dir',type=Path)
+    design.add_argument('--dry-run',action='store_true')
+    for command in (config,design):
+        command.add_argument('--session-limit',type=int)
+        command.add_argument('--minutes',type=float)
+        command.add_argument('--k',type=int)
+        command.add_argument('--model')
+    resume=sub.add_parser('resume-final');resume.add_argument('job',type=Path);resume.add_argument('--minutes',type=float,required=True)
+    repair=sub.add_parser('repair-delivery');repair.add_argument('job',type=Path)
+    status=sub.add_parser('status');status.add_argument('job',type=Path)
+    evidence=sub.add_parser('evidence');evidence.add_argument('run_dir',type=Path)
     s=sub.add_parser('search');s.add_argument('--query',required=True);s.add_argument('--provider',choices=['europepmc','pubmed'],default='europepmc');s.add_argument('--limit',type=int,default=8);s.add_argument('--out',type=Path,required=True)
     c=sub.add_parser('collect');c.add_argument('--pmcid',nargs='+',required=True);c.add_argument('--search',type=Path);c.add_argument('--out',type=Path,required=True)
     i=sub.add_parser('import');i.add_argument('--input',type=Path,required=True);i.add_argument('--id',required=True);i.add_argument('--title',required=True);i.add_argument('--url',required=True);i.add_argument('--doi',default='');i.add_argument('--license',default='not supplied');i.add_argument('--out',type=Path,required=True)
@@ -35,7 +54,20 @@ def main(argv=None):
     args=p.parse_args(argv)
     try:
         if args.command=='setup':
-            out=core.setup();out['next']='Run biomethod doctor, then prepare a goal/evidence task. Model trials require an explicit run request.'
+            out=core.setup();out['settings']=settings();out['next']='For a material design request, load biomethod-design and invoke design --goal after clarifying the target. Setup alone is not completion.'
+        elif args.command=='configure':
+            out=configure(dict(session_limit=args.session_limit,minutes=args.minutes,k=args.k,model=args.model))
+        elif args.command=='design':
+            out=run_design(args.goal,queries=args.query,bundle=args.bundle,run_dir=args.run_dir,dry_run=args.dry_run,prepared_from=args.prepared_from,
+                           overrides=dict(session_limit=args.session_limit,minutes=args.minutes,k=args.k,model=args.model))
+        elif args.command=='resume-final':
+            from .resume import resume_final
+            out=resume_final(args.job,minutes=args.minutes)
+        elif args.command=='repair-delivery':
+            from .repair import repair_delivery
+            out=repair_delivery(args.job)
+        elif args.command=='status':out=job_status(args.job)
+        elif args.command=='evidence':out=export_execution(args.run_dir)
         elif args.command=='doctor':
             out=core.doctor();out.update(pdf_extractors={'pdftotext':bool(shutil.which('pdftotext')),'opendataloader-pdf':bool(shutil.which('opendataloader-pdf'))},product='RobinBioMethod',state=str(state_root()),model_calls=0)
         elif args.command=='search':
@@ -59,20 +91,18 @@ def main(argv=None):
             shutil.copy2(example/'curated-method.json',args.out/'curated-method.json')
             out=render(args.out/'source',args.out/'curated-method.json',args.out/'method.md')
             dump(args.out/'assessment.json',out)
-            out=dict(status='completed' if out['valid'] else 'incomplete',model_calls=0,
+            out=dict(status='completed' if out['valid'] else 'incomplete',model_calls=0,workflow_complete=False,harness2_executed=False,
                      artifact=str(args.out/'method.md'),origin='host-curated public literature example; NOT a model-generated optimization')
-        elif args.command=='report':out=core.read_report(args.run_dir)
+        elif args.command=='report':
+            raw=core.read_report(args.run_dir);proof=export_execution(args.run_dir)
+            out=dict(raw,core_report_status=raw.get('status'),status=proof['status'],harness2_executed=proof['core_executed'],verified=proof['verified'])
         elif args.command=='run':
             if read(Path(args.task)).get('evaluator')!='biomethod-v1':raise ValueError('RobinBioMethod requires a biomethod-v1 task.')
             report,run=core.optimize(args)
-            artifacts=sorted((run/'primary/executions').rglob('output/method.json'))
-            if artifacts:
-                compare(run/'frozen/source',[(str(x.parent.parent.relative_to(run/'primary/executions')),x) for x in artifacts],run/'stage-comparison.json')
-            if report['status']=='completed':
-                token='agg' if args.mode=='parallel' else 'seq'
-                selected=Path(report['upstream_result']['selections'][token]['chosen_run_dir'])/'output/method.json'
-                render(run/'frozen/source',selected,run/'candidate-method.md')
-            out=dict(status=report['status'],report=str(run/'report.json'),recommended=False,scientific_performance='not experimentally tested',errors=report['errors'])
+            proof=export_execution(run)
+            out=dict(status=proof['status'],harness2_executed=proof['core_executed'],report=str(run/'report.json'),
+                     execution_evidence=str(run/'execution-evidence.json'),recommended=False,
+                     scientific_performance='not experimentally tested',errors=report['errors'])
         print(json.dumps(out,ensure_ascii=False,indent=2))
         return 1 if out.get('status')=='incomplete' or out.get('valid') is False or out.get('ok') is False else 0
     except Exception as exc:

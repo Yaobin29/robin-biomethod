@@ -15,7 +15,7 @@ def render(source, artifact, out):
              f"created: {date.today().isoformat()}", f"updated: {date.today().isoformat()}", "tags: [output, research, biomethod]", "---", "",
              "# 候选合成方法＋最小验证实验", "", f"材料：{data.get('material')}；状态：{data.get('status')}。",
              "", "本报告未证明合成效果、纯度、生物相容性或实验安全性。", "",
-             "## 目标与证据边界", "", f"目标：{goal['target']['metric']} = {goal['target']['value']} ± {goal['target']['tolerance']} {goal['target']['unit']}。",
+             "## 目标与证据边界", "", f"目标：{goal['target']['metric']} = {goal['target']['value']} ± {goal['target']['tolerance'] if goal['target']['tolerance'] is not None else '未确定'} {goal['target']['unit']}。",
              f"定义：{goal['target']['definition']}；测定：{goal['target']['assay']}。", "", f"规模：{goal['scale']['value']} {goal['scale']['unit']}；基准：{goal['scale']['basis']}。", ""]
     lines += ["- " + x for x in data.get('evidence_limitations', [])]
     for m in data.get('candidate_methods', []):

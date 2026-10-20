@@ -74,7 +74,7 @@ class Budget:
             i = len(self.data["sessions"])
             self.data["sessions"].append(dict(label=label, state="running", started=time.time()))
             dump(self.path, self.data)
-            return i, min(180, seconds)
+            return i, min(600, seconds)
 
     def finish(self, i: int, **record):
         with self.lock:
@@ -127,6 +127,9 @@ class CodexRunner:
                         "--skip-git-repo-check", "--sandbox", "workspace-write",
                         "-c", 'approval_policy="never"', "-c", "features.memories=false",
                         "-c", "features.multi_agent=false",
+                        "-c", "features.apps=false",
+                        "-c", "features.plugins=false",
+                        "-c", "features.in_app_browser=false",
                         "-c", "sandbox_workspace_write.network_access=false",
                         "-c", 'model_reasoning_effort="high"',
                         "--json", "--color", "never",
@@ -147,7 +150,10 @@ class CodexRunner:
                     except subprocess.TimeoutExpired:
                         os.killpg(proc.pid, signal.SIGKILL)
                         stdout, stderr = proc.communicate()
-                    self.budget.finish(i, state="timeout", wall_s=time.time() - t0)
+                    partial = redact(stdout, [self.auth_home, identity, workspace])
+                    (self.audit / f"{i:03d}.partial.jsonl").write_text(partial)
+                    self.budget.finish(i, state="timeout", wall_s=time.time() - t0,
+                                       error="Session wall limit reached; partial trace preserved", transport="codex_cli")
                     raise TimeoutError(f"Codex session timed out: {label}")
                 events, messages, usage = [], [], {}
                 for line in stdout.splitlines():
@@ -164,15 +170,16 @@ class CodexRunner:
                 private = [self.auth_home, identity, workspace]
                 log = redact("\n".join(json.dumps(e, ensure_ascii=False) for e in events), private)
                 (self.audit / f"{i:03d}.jsonl").write_text(log + "\n")
-                error = redact(stderr[-1200:], private)
+                errors = [e.get("message", e.get("error", "")) for e in events if e.get("type") in ("error", "turn.failed")]
+                error = redact("\n".join(x for x in (stderr[-1200:], json.dumps(errors, ensure_ascii=False) if errors else "") if x), private)
                 ok = proc.returncode == 0 and bool(messages)
                 if policy.read_bytes() != before:
                     ok, error = False, "Immutable worker policy was modified."
                 self.budget.finish(i, state="ok" if ok else "failed", model=self.model,
                                    actual_model=None if self.model == "codex-default" else self.model,
                                    usage=usage, cost_usd=None, wall_s=round(time.time() - t0, 2),
-                                   error=error)
+                                   error=error, transport="codex_cli", exit_code=proc.returncode,
+                                   audit_sha256=hashlib.sha256((log + "\n").encode()).hexdigest())
                 if not ok:
-                    errors = [e.get("message", e.get("error", "")) for e in events if e.get("type") in ("error", "turn.failed")]
                     raise RuntimeError(redact(f"Codex failed ({proc.returncode}): {errors or error}", private))
-                return dict(text="\n".join(messages), trajectory=log, usage=usage)
+                return dict(text="\n".join(messages), trajectory=log, usage=usage, audit_index=i)

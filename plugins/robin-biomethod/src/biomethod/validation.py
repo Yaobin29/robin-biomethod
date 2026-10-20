@@ -42,6 +42,8 @@ def inspect_artifact(source, data):
     require(data.get("schema_version") == 1, "artifact schema_version must be 1")
     require(data.get("material") == goal["material"], "artifact material does not match frozen goal")
     require(data.get("status") in ("candidate_unvalidated", "draft_missing_evidence"), "method must remain explicitly unvalidated")
+    if goal.get("unknown_fields"):
+        require(data.get("status") == "draft_missing_evidence", "unresolved goal fields require draft_missing_evidence")
     require(data.get("target_assessment", {}).get("status") in ("unvalidated", "unsupported"), "target achievement cannot be asserted without experimental results")
     require(isinstance(data.get("target_assessment", {}).get("reason"), str) and bool(data["target_assessment"]["reason"].strip()), "target assessment requires a bounded reason")
     require(bool(data.get("evidence_limitations")) and strings(data.get("evidence_limitations")), "state evidence limitations")

@@ -5,6 +5,7 @@ import argparse
 from datetime import datetime, timezone
 import difflib
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -116,17 +117,17 @@ def snapshot_task(adapter, dest: Path) -> Path:
     return dest / "task.json"
 
 
-def optimize(args):
-    if not (1 <= args.k <= 3) or not (1 <= args.session_limit <= 24) or not (1 <= args.minutes <= 60):
-        raise ValueError("v0.1 limits: k=1..3, sessions=1..24, minutes=1..60.")
+def optimize(args, *, budget=None, runner=None):
+    if not (1 <= args.k <= 3) or args.session_limit < 1 or not math.isfinite(args.minutes) or args.minutes <= 0:
+        raise ValueError("Use k=1..3 and positive finite session/time limits.")
     source_manifest = Path(args.task).expanduser().resolve()
     run = (Path(args.run_dir).expanduser().resolve() if args.run_dir else
            state_root() / "runs" / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ"))
     if (run / "report.json").exists() or (run / "budget.json").exists():
         raise ValueError("Use a new run directory. v0.1 does not resume partially evaluated runs.")
     run.mkdir(parents=True, exist_ok=False)
-    budget = Budget(run / "budget.json", args.session_limit, args.minutes)
-    runner = CodexRunner(budget, run / "audit", args.model)
+    budget = budget or Budget(run / "budget.json", args.session_limit, args.minutes)
+    runner = runner or CodexRunner(budget, run / "audit", args.model)
     proposer = CodexProposer(runner, run / "editors")
     original = FileTaskAdapter(source_manifest, run / "primary", runner)
     original_base_hash = fingerprint(original.base)
