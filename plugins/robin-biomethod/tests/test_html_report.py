@@ -80,3 +80,34 @@ class HTMLReportTests(unittest.TestCase):
         self.assertEqual(main(['demo','--out',str(out)]),0)
         self.assertTrue((out/'method.html').is_file());self.assertTrue((out/'method.md').is_file())
         self.assertIn('未完成全流程核验',(out/'method.html').read_text())
+
+    def test_progressive_disclosure_and_branch_diagram(self):
+        s=self.generate();parser=Tags();parser.feed(s)
+        self.assertIn('svg',parser.tags)
+        self.assertGreater(parser.tags.count('details'),10)
+        self.assertFalse(any('open' in a for a in parser.attrs))
+        for title in ['完整目标、约束、假设与证据边界','依据与计算','对照、采样、接受条件与结果分支','完整文档检查与错误记录']:
+            self.assertIn(title,s)
+        self.assertIn('Baseline分别进入INV和DOM',s)
+        self.assertIn('独立批次 / 技术重复',s)
+        self.assertIn('预期结果',s);self.assertIn('可证伪条件',s)
+    def test_stage_and_final_method_anchors_are_unique(self):
+        stage=dict(label='base1',executed=True,artifact=str(self.artifact),assessment=dict(valid=True),parameter_changes=[])
+        s=self.generate(comparison=dict(stages=[stage,dict(stage,label='inv1')]))
+        parser=Tags();parser.feed(s)
+        ids=[a['id'] for a in parser.attrs if 'id' in a]
+        self.assertEqual(len(ids),len(set(ids)))
+        for a in parser.attrs:
+            if a.get('href','').startswith('#'):self.assertIn(a['href'][1:],ids)
+    def test_collapsed_support_preserves_source_and_experiment_values(self):
+        s=self.generate()
+        from html import escape
+        for m in self.data['candidate_methods']:
+            for step in m['steps']:
+                for p in step['parameters']:
+                    for ref in p.get('evidence',[]):
+                        self.assertIn(escape(ref['quote']),s)
+        for e in self.data['validation_experiments']:
+            for r in e['readouts']:
+                for key in ('metric','method','unit','acceptance','acceptance_basis'):
+                    self.assertIn(escape(str(r[key])),s)

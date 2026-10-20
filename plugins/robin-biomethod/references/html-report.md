@@ -41,3 +41,29 @@ Visual styling can change without altering scientific values or rewriting stage 
 The renderer is a deterministic package capability, rather than a general design skill
 copied into every model prompt. Slide themes from html-ppt are deliberately not required
 for the scrollable scientific report.
+
+## Reading hierarchy (0.2.2)
+
+Default-visible content must answer the section's immediate question. Do not render
+recursive JSON field lists directly as the main report body. Keep the complete values
+inside support disclosures instead of dropping or paraphrasing scientific content.
+
+- Brief: target/scale table, current evidence judgment and links to methods/experiments.
+- Literature: one Why/How/What comparison table per paper; source quotes folded.
+- Process: Baseline branches to INV/DOM and merges in AGG. This diagram represents logical
+  relationships, not a claim of simultaneous execution. Actual execution/quality remains
+  in a separate stage table. Per-stage methods, rule text and accounting are folded.
+- Methods: step overview plus readable parameter/value/origin tables. Quote, assumption
+  and arithmetic detail is folded inside each parameter row, where it can be checked.
+- Experiments: hypothesis/batch/readout comparison first, then one closed disclosure per
+  experiment for controls, sampling, acceptance and falsification/decision tables.
+- Constraints/unknowns: named rows in comparison tables, never unlabeled nested lists.
+- Sources: source/link/access table; registry metadata and full checks folded.
+
+All support panels start closed. Preserve all quotes and experiment acceptance criteria.
+Never collapse the entire primary method or hide critical unknown values. Stage and final
+method anchors must be unique. The report stays script-free and single-file. Retain a
+previous HTML snapshot when replacing a user's report after a layout review.
+
+Failure pattern: styling a recursive dictionary renderer changes colors but leaves the
+reader without a decision hierarchy. Fix the semantic section layout before decoration.

@@ -102,3 +102,11 @@ its 3W and minimal experiment content. Original live HAMA results were rendered 
 new model calls; this does not repeat or extend scientific acceptance. Browser visual QA
 was not completed: the browser policy rejected local-file navigation. Responsive and print
 CSS are implemented and structurally tested, not certified by screenshot or paper output.
+
+## 0.2.2 reading hierarchy
+
+106 tests on local Python 3.12/3.13 include support panels closed by default, inline SVG
+branch/merge logic, experiment decision/acceptance tables, complete quote/readout retention
+and unique method anchors across stage/final views. Real saved HAMA input is reused with
+zero model calls. All scientific JSON and execution receipts are unchanged. Browser visual
+inspection remains unverified due to the previously blocked local-file navigation.

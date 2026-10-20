@@ -1,6 +1,6 @@
 {
   "name": "robin-biomethod",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Evidence-grounded biomaterial synthesis methods and minimal validation experiments using Harness2.",
   "author": {
     "name": "Yaobin Wu"

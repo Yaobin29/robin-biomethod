@@ -84,3 +84,8 @@ navigation from frontend-skill; neither global skill is a runtime dependency. Do
 or load a web-app/slide stack merely to render a report. Use `html-report JOB` to render a
 saved run with zero model calls. This is presentation, never permission to restart design.
 Standalone `render --out method.html` and curated demo HTML remain visibly unverified.
+
+Final HTML follows progressive disclosure: current judgment, method parameters and
+experiment comparisons remain visible; citations, arithmetic, raw rules, prior stage
+methods and accounting start folded. Use semantic tables and branch/merge diagrams,
+not recursive field dumps. Preserve scientific content and visibly unknown conditions.

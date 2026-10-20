@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 — 2026-10-21
+
+- Replaced recursive field dumps in the main HTML body with section-specific layouts.
+- Target judgment and method/experiment links appear first; support starts collapsed.
+- Parameter values remain visible; quotes, calculations and assumptions fold per row.
+- Branch/merge Harness2 diagram, experiment decision map and structured comparison tables.
+- Stage methods, rule text, experiment details, registry and accounting stay available.
+- Unique anchors for repeated stage/final methods;106 offline tests on Python3.12/3.13.
+- No new model calls or scientific-content changes; prior report snapshot retained.
+
 ## 0.2.1 — 2026-10-20
 
 - Self-contained offline HTML becomes the primary final report, retaining Markdown/JSON.
