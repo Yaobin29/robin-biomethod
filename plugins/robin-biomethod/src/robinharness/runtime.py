@@ -152,8 +152,20 @@ class CodexRunner:
                         stdout, stderr = proc.communicate()
                     partial = redact(stdout, [self.auth_home, identity, workspace])
                     (self.audit / f"{i:03d}.partial.jsonl").write_text(partial)
+                    partial_output = None
+                    output = workspace / "output"
+                    if output.is_dir() and not output.is_symlink():
+                        try:
+                            digest = fingerprint(output)
+                            saved = self.audit / "partials" / f"{i:03d}" / "output"
+                            shutil.copytree(output, saved)
+                            dump(saved.parent / "receipt.json", dict(status="incomplete", transport_completed=False,
+                                 output_hash=digest, audit_index=i, reason="Worker timed out; files are drafts only."))
+                            partial_output = str(saved.relative_to(self.audit))
+                        except (ValueError, OSError):
+                            pass
                     self.budget.finish(i, state="timeout", wall_s=time.time() - t0,
-                                       error="Session wall limit reached; partial trace preserved", transport="codex_cli")
+                                       error="Session wall limit reached; partial trace preserved", transport="codex_cli", partial_output=partial_output)
                     raise TimeoutError(f"Codex session timed out: {label}")
                 events, messages, usage = [], [], {}
                 for line in stdout.splitlines():

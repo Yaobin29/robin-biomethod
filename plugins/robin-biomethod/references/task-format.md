@@ -66,7 +66,7 @@ For an already frozen task, the lower-level core command is:
 
 Prepare holdouts before the run. Changing only a task id, duplicating the same problem
 or lightly rephrasing a source is not scientific independence. Never use holdouts as
-editing context or let a candidate rewrite the evaluator. User confirms model budget.
+editing context or let a candidate rewrite the evaluator. State and honor the bounded budget; the design request authorizes the default workflow unless the user limits it.
 Positive finite budgets are configurable; defaults are16sessions/45minutes.
 An unresolved tolerance may be null when target.tolerance is listed in unknown_fields;
 any declared unknown forces draft_missing_evidence.

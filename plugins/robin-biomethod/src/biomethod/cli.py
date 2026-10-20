@@ -1,4 +1,4 @@
-"""Independent product entry point; research actions and model trials are separate."""
+"""Evidence-grounded design entry with explicit lower-level research tools."""
 from __future__ import annotations
 import argparse
 import json
@@ -34,7 +34,7 @@ def main(argv=None):
         command.add_argument('--minutes',type=float)
         command.add_argument('--k',type=int)
         command.add_argument('--model')
-    resume=sub.add_parser('resume-final');resume.add_argument('job',type=Path);resume.add_argument('--minutes',type=float,required=True)
+    resume=sub.add_parser('resume-final');resume.add_argument('job',type=Path);resume.add_argument('--minutes',type=float,required=True);resume.add_argument('--extra-minutes',type=float,default=0);resume.add_argument('--reuse-partial',action='store_true')
     repair=sub.add_parser('repair-delivery');repair.add_argument('job',type=Path)
     status=sub.add_parser('status');status.add_argument('job',type=Path)
     evidence=sub.add_parser('evidence');evidence.add_argument('run_dir',type=Path)
@@ -62,7 +62,7 @@ def main(argv=None):
                            overrides=dict(session_limit=args.session_limit,minutes=args.minutes,k=args.k,model=args.model))
         elif args.command=='resume-final':
             from .resume import resume_final
-            out=resume_final(args.job,minutes=args.minutes)
+            out=resume_final(args.job,minutes=args.minutes,extra_minutes=args.extra_minutes,reuse_partial=args.reuse_partial)
         elif args.command=='repair-delivery':
             from .repair import repair_delivery
             out=repair_delivery(args.job)

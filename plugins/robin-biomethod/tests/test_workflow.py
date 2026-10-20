@@ -267,6 +267,8 @@ class WorkflowTests(unittest.TestCase):
         ws = self.root / "worker"
         ws.mkdir()
         (ws / "AGENTS.md").write_text(POLICY)
+        (ws / "output").mkdir()
+        dump(ws / "output/method.json", dict(status="draft_missing_evidence"))
         b = Budget(self.root / "budget.json", 1, 1)
         with patch("robinharness.runtime.shutil.which", return_value="/fake/codex"):
             runner = CodexRunner(b, self.root / "audit", "codex-default")
@@ -277,6 +279,9 @@ class WorkflowTests(unittest.TestCase):
                 runner.run(ws, "test", "timeout")
             kill.assert_called_once()
         self.assertEqual(b.data["sessions"][0]["state"], "timeout")
+        partial = self.root / "audit" / b.data["sessions"][0]["partial_output"]
+        self.assertTrue((partial / "method.json").exists())
+        self.assertFalse(json.loads((partial.parent / "receipt.json").read_text())["transport_completed"])
         with self.assertRaises(BudgetExceeded):
             b.reserve("retry")
 

@@ -105,3 +105,11 @@ upstream algorithm is unchanged. The previous report, workflow, budget and nativ
 are retained in final-recovery-history. Pauses do not consume active execution allowance;
 prior active time and all failed sessions still count. Existing final artifacts cannot be
 silently overwritten. Other partial trees require a fresh, explicitly bounded run.
+
+With explicit new human authorization, `--extra-minutes N` extends only that job's active
+time allowance and records the extension; it never extends the session cap. Do not infer
+a top-up from silence, a timeout, or a generic request to retry. `--reuse-partial` may seed
+the final worker with a hash-verified recovered draft that passes document checks. The
+new worker must still complete a real call; a timeout draft alone cannot qualify. Each
+continuation retains a numbered checkpoint history. Timeout partials have incomplete
+receipts and cannot be counted as completed stages.

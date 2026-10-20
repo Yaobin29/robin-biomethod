@@ -1,28 +1,48 @@
-# Validation — RobinBioMethod 0.2.0 (unreleased)
+# Validation — RobinBioMethod 0.2.0
 
-The full-workflow fix is under acceptance. Offline tests are implementation evidence,
-not proof of scientific reasoning or a completed live workflow.
+Date:2026-10-20. Independent implementation; no Google/OpenAI endorsement or scientific benchmark claim.
 
-- macOS Python3.12 and3.13:93 offline regression tests passed on each.
-- Source package privacy scan passed; isolated native0.2.0 installation/discovery passed.
-- HAMA acceptance: original native discovery, screening and one full text succeeded;
-  extraction failed with CLI workspace out-of-credits. No original core stage ran.
-- A bounded recovery reuses that registered evidence, explicitly marking external input.
-  Prior attempts remain recorded; no new allowance is silently invented.
-- Recovery extraction succeeded with real model transport; first core baseline hit the
-  old180second per-session cap. The wrapper now allows600seconds within the shared
-  wall deadline and verifies frozen preparation before starting a new core tree.
-- Original baseline, INV proposal and DOM proposal ran with actual CLI traces.
-  DOM execution removed the baseline arithmetic syntax errors; remaining prerequisite
-  coverage is kept visible. This is document-level progress, not scientific efficacy.
-- Delivery contract repair is separately audited and cannot modify original scientific
-  parameters, evidence or uncertainty. Source/approval gaps remain blocked.
-- AGG rule composition completed, but the final execution returned workspace out-of-credits;
-  no final artifact or reflection existed. Three successful stage methods and all rule edits
-  are preserved. A guarded final-only continuation uses native upstream functions.
-- Release and installation are gated on real full-workflow acceptance, including natural
-  design-request routing, original stage traces, artifacts and final document checks.
-- Existing 0.1.0 installation and public main remain distinct from this unreleased source.
+| Boundary | Result |
+| --- | --- |
+| macOS Python3.12 /3.13 |95 offline tests passed on each |
+| Source and ZIP native installation | Passed in isolated homes, including paths with spaces |
+| Public literature | Actual discovery, source screening and full-text acquisition completed |
+| Structured preparation | Real extraction, registered quotes, task profile and frozen goal/source |
+| Original Harness2 k1 | Actual baseline, INV/DOM proposals and executions, AGG composition/execution, trivial final delivery and reflection verified |
+| Natural-language plugin entry | Installed design skill read; verified same-task result reused and linked; no second scientific trial |
+| Final document | Strict structure/provenance/arithmetic/coverage checks passed |
+| Recovery | Quota errors and timeouts preserved; final completed by guarded checkpoint continuation |
+| Model accounting |15 attempts including4 failures and1 separate natural-entry check; within authorized16sessions/60minutes |
+| Actual monetary cost | Unknown; no conversion from session count to Codex allowance |
+| Scientific target achievement / wet-lab work | Not established / not performed |
+
+The HAMA acceptance case is a declared-assumption test, not an experimental result. One
+primary full text was available; unavailable supplementary material remains a gap. The
+candidate remains draft_missing_evidence. Unknown tolerance, equipment, assay qualification
+and route transfer are not silently filled. Document checks do not establish chemical
+entailment, assay correctness, purity, hazard approval, target success or reproducibility.
+
+The first attempts hit quota and an overly short180second wrapper timeout. A failed final
+was retained, its complete draft recovered from recorded tool stdout and checked, then
+supplied to a new real final worker. That worker completed; original native selection and
+reflection followed. Timeout drafts alone cannot qualify. Original baseline/INV/DOM files,
+failed calls, checkpoint histories and source snapshots were retained; no original upstream
+recursion, prompts, aggregation or selection algorithm was changed.
+
+Preparation and retries share each persisted task budget. Paused continuations preserve
+cumulative active time; explicit extra-time authorization is recorded and never raises the
+session cap. In this acceptance, the user extended the original45minute time cap to60minutes.
+The natural-entry check had its own remaining-allowance ledger covering the same total cap.
+This is one scientific-task run completed across checkpoints plus a result-reuse entry test,
+not two independent end-to-end trials or evidence of general scientific improvement.
+
+The95offline tests include original-core wiring, ordinary-design routing contracts, setup
+handoff, source/quote/route identity, unknown goals, shared budgets, native continuation,
+partial-output integrity, corrupt traces/receipts, tampered outputs and constrained contract
+repair. Synthetic traces test binding rules only; they are not live acceptance evidence.
+
+Private goals, raw papers, model traces, credentials and user results are excluded from
+source/releases. Only public curated fixtures and generic implementation/tests are shipped.
 
 ## Historical 0.1.0 validation
 

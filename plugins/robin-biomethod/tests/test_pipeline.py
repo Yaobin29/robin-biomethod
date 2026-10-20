@@ -47,7 +47,10 @@ class PipelineTests(unittest.TestCase):
                     patch_data=dict(expressions=[dict(method_id=m['id'],step=si,parameter=pi,expression=p['expression']) for m in outer.repaired['candidate_methods'] for si,step in enumerate(m['steps']) for pi,p in enumerate(step['parameters']) if p['origin']=='calculated'],validation_experiments=outer.repaired['validation_experiments'])
                     if outer.repaired['material']!=outer.artifact['material']:patch_data['material']=outer.repaired['material']
                     dump(ws/'output/result.json',patch_data);r=dict(text='synthetic repair fixture',usage={})
-                else:r=super().run(ws,mission,label,timeout)
+                else:
+                    if label.endswith('/agg1') and (ws/'output/method.json').exists():outer.seed_seen=True
+                    r=super().run(ws,mission,label,timeout)
+                    if label.startswith('experience.') and getattr(outer,'save_experience',False):r['text']='<experience>cue: fixture task\nlesson: Keep evidence checks scoped\nevidence: observed fixture links\nconfidence: low</experience>'
                 if getattr(outer,'synthetic_trace',False):
                     # Synthetic protocol trace for tamper tests; NOT live acceptance.
                     audit.mkdir(exist_ok=True)
@@ -220,10 +223,11 @@ class PipelineTests(unittest.TestCase):
         self.synthetic_trace=True;self.fail_final=True
         first=self.design(overrides=dict(session_limit=24))
         self.assertFalse(first['workflow_complete']);self.assertEqual(first['model_sessions_attempted'],8)
-        self.fail_final=False
+        self.fail_final=False;self.save_experience=True
         result=resume_final(self.root/'job',minutes=30,runner_factory=self.runner)
         self.assertTrue(result['workflow_complete'],result);self.assertEqual(result['model_sessions_attempted'],10)
         self.assertTrue(execution_evidence(self.root/'job/harness')['verified'])
+        self.assertTrue(list((self.root/'job/harness/library').rglob('EXPERIENCE.md')))
     def test_native_tail_recovery_preserves_account_failure(self):
         from biomethod.resume import resume_final
         self.synthetic_trace=True;self.fail_final=True;self.design(overrides=dict(session_limit=24))
@@ -238,6 +242,32 @@ class PipelineTests(unittest.TestCase):
         work=next((self.root/'job/harness/primary/runs').rglob('summary.json')).parent
         f=work/'harnesses/agg1/AGENTS.md';f.write_text(f.read_text()+'\nChanged outside proposal.\n')
         with self.assertRaises(ValueError):resume_final(self.root/'job',minutes=30,runner_factory=self.runner)
+
+    def test_explicit_extension_and_partial_seed_preserve_stage_history(self):
+        from biomethod.resume import resume_final
+        self.synthetic_trace=True;self.fail_final=True;self.design(overrides=dict(session_limit=24))
+        resume_final(self.root/'job',minutes=30,runner_factory=self.runner)
+        folder=self.root/'job/partial-recovered';folder.mkdir()
+        dump(folder/'method.json',self.artifact)
+        digest=hashlib.sha256((folder/'method.json').read_bytes()).hexdigest()
+        dump(folder/'recovery.json',dict(method_sha256=digest,transport_completed=False))
+        self.fail_final=False
+        result=resume_final(self.root/'job',minutes=45,extra_minutes=15,reuse_partial=True,runner_factory=self.runner)
+        self.assertTrue(result['workflow_complete'],result);self.assertTrue(self.seed_seen)
+        self.assertEqual(result['model_sessions_attempted'],11)
+        self.assertEqual(result['settings']['minutes'],60)
+        self.assertTrue((self.root/'job/final-recovery-history-002').exists())
+        proof=execution_evidence(self.root/'job/harness')
+        final=next(x for x in proof['stages'] if x['label']=='agg1')
+        receipt=json.loads((Path(final['artifact']).parent.parent/'execution.json').read_text())
+        self.assertEqual(receipt['continuation_seed_sha256'],digest)
+    def test_partial_seed_hash_must_match(self):
+        from biomethod.resume import resume_final
+        self.synthetic_trace=True;self.fail_final=True;self.design(overrides=dict(session_limit=24))
+        folder=self.root/'job/partial-recovered';folder.mkdir();dump(folder/'method.json',self.artifact)
+        dump(folder/'recovery.json',dict(method_sha256='wrong'))
+        with self.assertRaises(ValueError):resume_final(self.root/'job',minutes=30,reuse_partial=True,runner_factory=self.runner)
+        self.assertEqual(len(json.loads((self.root/'job/budget.json').read_text())['sessions']),8)
 
     def test_routing_contract(self):
         setup=(PLUGIN/'skills/biomethod-setup/SKILL.md').read_text()
