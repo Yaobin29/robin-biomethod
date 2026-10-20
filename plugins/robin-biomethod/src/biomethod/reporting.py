@@ -9,6 +9,9 @@ from .validation import assess
 
 
 def render(source, artifact, out):
+    if Path(out).suffix.lower() in ('.html', '.htm'):
+        from .html_report import render_html
+        return render_html(source, artifact, out)
     data = read(artifact);goal=read(Path(source)/'goal.json')
     lines = ["---", "id: output-artifact/biomethod/method-" + hashlib.sha256(str(out).encode()).hexdigest()[:12], "type: output-artifact",
              'title: "Candidate biomaterial method and minimal validation"', "status: generated", "version: v1",

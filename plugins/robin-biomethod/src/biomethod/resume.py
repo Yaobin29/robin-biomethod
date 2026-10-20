@@ -89,8 +89,10 @@ def resume_final(job,*,minutes,runner_factory=None,extra_minutes=0,reuse_partial
             proof=repair_delivery(job,runner_factory=lambda b,a,m: runner)
         else:
             from .pipeline import write_literature_review
-            for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json'):shutil.copy2(run/name,job/name)
+            for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json','report.html'):shutil.copy2(run/name,job/name)
             shutil.copytree(run/'stage-methods',job/'stage-methods',dirs_exist_ok=True);write_literature_review(job)
+            from .html_report import render_job_report
+            render_job_report(job,proof)
         workflow=read(job/'workflow.json');workflow.update(status='completed',workflow_complete=True,harness2_executed=True,errors=[],current_stage='delivery')
         workflow['stages']['harness2']=dict(state='completed',mode='native-final-recovery')
         workflow['stages']['delivery']=dict(state='completed');workflow['updated']=now();dump(job/'workflow.json',workflow)

@@ -89,10 +89,12 @@ fields are allowed. The controller applies this patch to the immutable draft and
          scope='post-core contract repair; original stage output retained'))
     proof=export_execution(run,job/'budget.json',job/'audit')
     if not proof['verified']:raise ValueError('Delivery repair transport or provenance not verified.')
-    for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json'):
+    for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json','report.html'):
         shutil.copy2(run/name,job/name)
     shutil.copytree(run/'stage-methods',job/'stage-methods',dirs_exist_ok=True)
     write_literature_review(job)
+    from .html_report import render_job_report
+    render_job_report(job,proof)
     history=read(job/'workflow.json')
     history.setdefault('recovered_errors',[]).extend(history.get('errors',[]))
     history.update(status='completed',workflow_complete=True,harness2_executed=True,errors=[],current_stage='delivery',

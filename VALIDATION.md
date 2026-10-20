@@ -92,3 +92,13 @@ Optional Zotero/OpenDataLoader backends were not exercised; text input remains s
 The original Robinharness source, global model configuration and governance were not edited.
 
 Cross-platform evidence: [Actions run39365539578](https://github.com/Yaobin29/robin-biomethod/actions/runs/39365539578), code commit d5bd510e3be430f265cfdd02474d656706c5df8c. Direct GitHub installation, the offline demo and62tests also passed in an isolated local home.
+
+## 0.2.1 HTML presentation validation
+
+103 offline tests cover HTML field retention, source escaping, URL schemes, no external
+resources, anchors/accessibility/print declarations, Markdown compatibility, honest demo
+status and saved-proof rechecking. The complete design fixture also checks HTML includes
+its 3W and minimal experiment content. Original live HAMA results were rendered with zero
+new model calls; this does not repeat or extend scientific acceptance. Browser visual QA
+was not completed: the browser policy rejected local-file navigation. Responsive and print
+CSS are implemented and structurally tested, not certified by screenshot or paper output.

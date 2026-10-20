@@ -122,4 +122,8 @@ def export_execution(run,budget_path=None,audit_dir=None):
             f"单独记录的交付文档修复：{proof.get('delivery_repair_executed',False)}；原始阶段输出保留。",
             'KEEP_BASE也是合法结果；参数未改变不代表未运行。须以execution-evidence.json和审计轨迹核对真实执行。',
             '本记录不证明合成效果、纯度或生物相容性；候选仍需科学审阅和实验验证。','']
-    (run/'execution-report.md').write_text('\n'.join(lines));return proof
+    (run/'execution-report.md').write_text('\n'.join(lines))
+    if proof.get('delivery_artifact') and proof.get('delivery_assessment',{}).get('valid'):
+        from .html_report import render_job_report
+        render_job_report(run,proof)
+    return proof

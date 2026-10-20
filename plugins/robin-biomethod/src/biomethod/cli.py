@@ -36,6 +36,7 @@ def main(argv=None):
         command.add_argument('--model')
     resume=sub.add_parser('resume-final');resume.add_argument('job',type=Path);resume.add_argument('--minutes',type=float,required=True);resume.add_argument('--extra-minutes',type=float,default=0);resume.add_argument('--reuse-partial',action='store_true')
     repair=sub.add_parser('repair-delivery');repair.add_argument('job',type=Path)
+    html=sub.add_parser('html-report',help='Render saved results as offline HTML; zero model calls');html.add_argument('job',type=Path)
     status=sub.add_parser('status');status.add_argument('job',type=Path)
     evidence=sub.add_parser('evidence');evidence.add_argument('run_dir',type=Path)
     s=sub.add_parser('search');s.add_argument('--query',required=True);s.add_argument('--provider',choices=['europepmc','pubmed'],default='europepmc');s.add_argument('--limit',type=int,default=8);s.add_argument('--out',type=Path,required=True)
@@ -66,6 +67,10 @@ def main(argv=None):
         elif args.command=='repair-delivery':
             from .repair import repair_delivery
             out=repair_delivery(args.job)
+        elif args.command=='html-report':
+            from .html_report import render_job_report
+            report=render_job_report(args.job)
+            out=dict(status='rendered',html_report=str(report),model_calls=0)
         elif args.command=='status':out=job_status(args.job)
         elif args.command=='evidence':out=export_execution(args.run_dir)
         elif args.command=='doctor':
@@ -90,9 +95,10 @@ def main(argv=None):
             shutil.copytree(example/'task/source',args.out/'source')
             shutil.copy2(example/'curated-method.json',args.out/'curated-method.json')
             out=render(args.out/'source',args.out/'curated-method.json',args.out/'method.md')
+            render(args.out/'source',args.out/'curated-method.json',args.out/'method.html')
             dump(args.out/'assessment.json',out)
             out=dict(status='completed' if out['valid'] else 'incomplete',model_calls=0,workflow_complete=False,harness2_executed=False,
-                     artifact=str(args.out/'method.md'),origin='host-curated public literature example; NOT a model-generated optimization')
+                     artifact=str(args.out/'method.html'),markdown=str(args.out/'method.md'),origin='host-curated public literature example; NOT a model-generated optimization')
         elif args.command=='report':
             raw=core.read_report(args.run_dir);proof=export_execution(args.run_dir)
             out=dict(raw,core_report_status=raw.get('status'),status=proof['status'],harness2_executed=proof['core_executed'],verified=proof['verified'])

@@ -210,7 +210,7 @@ def run_design(goal_path,*,queries=None,bundle=None,run_dir=None,overrides=None,
         journal.data['usage']={key:sum(s.get('usage',{}).get(key,0) for s in budget.data['sessions']) for key in ('input_tokens','cached_input_tokens','output_tokens','reasoning_output_tokens')}
         journal.data['cost_usd']=None;journal.save()
     return dict(status=journal.data['status'],workflow_complete=journal.data['workflow_complete'],harness2_executed=journal.data['harness2_executed'],
-                job=str(root),workflow=str(root/'workflow.json'),method=str(root/'candidate-method.md') if (root/'candidate-method.md').exists() else None,
+                job=str(root),workflow=str(root/'workflow.json'),html_report=str(root/'report.html') if (root/'report.html').exists() else None,method=str(root/'candidate-method.md') if (root/'candidate-method.md').exists() else None,
                 model_sessions_attempted=journal.data['model_sessions_attempted'],errors=journal.data['errors'])
 
 def finish_core(root,journal,budget,runner,cfg):
@@ -233,10 +233,12 @@ def finish_core(root,journal,budget,runner,cfg):
     journal.step('harness2','completed',evidence='harness/execution-evidence.json')
     journal.step('delivery','running')
     write_literature_review(root)
-    for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json'):
+    for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json','report.html'):
         shutil.copy2(harness/name,root/name)
     shutil.copytree(harness/'stage-methods',root/'stage-methods',dirs_exist_ok=True)
-    journal.step('delivery','completed',method='candidate-method.md',process='execution-report.md',comparisons='stage-comparison.json')
+    from .html_report import render_job_report
+    render_job_report(root,proof)
+    journal.step('delivery','completed',report='report.html',method='candidate-method.md',process='execution-report.md',comparisons='stage-comparison.json')
     journal.data.update(status='completed',workflow_complete=True)
 
 

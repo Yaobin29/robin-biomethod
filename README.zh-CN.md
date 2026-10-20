@@ -91,3 +91,20 @@ Notion同步、实验结果回流、NMR定量分析和专用过程模型暂不�
 公开仓库：https://github.com/Yaobin29/robin-biomethod
 
 插件不自动发布你的实验材料。独立项目，非 Google 或 OpenAI 官方产品。
+
+## HTML 最终报告（0.2.1）
+
+默认交付 `report.html`：独立单文件，可离线阅读和浏览器打印。包含目标与未知条件、
+文献 3W、Baseline/INV/DOM/AGG 对比、规则修改、候选方法、最小验证实验及来源。
+保留 Markdown、JSON 与执行证据。排版整合 frontend-design 的科研编辑风格和
+frontend-skill 的克制导航，不需要额外安装这两个技能。
+
+已有完成任务可以单独生成 HTML，不增加模型调用：
+
+```bash
+python3 plugins/robin-biomethod/scripts/biomethod.py html-report /path/to/job
+```
+
+独立 `render --out method.html` 也支持 HTML；显式 `.md` 继续输出 Markdown。
+离线示例同时生成 HTML 与 Markdown，并明确标记未完成真实模型流程。
+HTML 展示不证明材料合成效果、纯度、安全性、生物相容性或可重复性。

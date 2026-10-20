@@ -113,3 +113,8 @@ the final worker with a hash-verified recovered draft that passes document check
 new worker must still complete a real call; a timeout draft alone cannot qualify. Each
 continuation retains a numbered checkpoint history. Timeout partials have incomplete
 receipts and cannot be counted as completed stages.
+
+## Primary readable delivery
+
+Completed jobs export a standalone offline `report.html` alongside Markdown and JSON.
+See html-report.md for rendering saved jobs without new model calls and presentation limits.

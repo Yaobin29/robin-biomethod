@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1 — 2026-10-20
+
+- Self-contained offline HTML becomes the primary final report, retaining Markdown/JSON.
+- Scientific editorial layout, responsive contents, stage disclosures and print styling.
+- Includes 3W, actual stage methods/differences, rule decisions, experiments and unknowns.
+- Saved-result rendering rechecks evidence without any new model call.
+- Escaped source content, HTTP(S)-only source links, no scripts or network resources.
+- HTML added to normal delivery, final recovery, contract repair and curated demos.
+- 103 offline tests; existing live HAMA output rendered without rerunning models.
+- Browser visual inspection unavailable because local-file navigation was blocked.
+
 ## 0.2.0 — 2026-10-20
 
 - Material design defaults to one full workflow; setup hands design requests onward.
