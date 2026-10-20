@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a source-only, reproducible ZIP; never include runtime state or credentials."""
+"""Build a reproducible source-and-assets ZIP; never include runtime state or credentials."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -7,7 +7,7 @@ import json
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED = {".agents", ".github", "plugins", "scripts"}
+ALLOWED = {".agents", ".github", "plugins", "scripts", "assets"}
 FILES = {"README.md", "README.zh-CN.md", "LICENSE", "VALIDATION.md", "CHANGELOG.md", ".gitignore"}
 
 

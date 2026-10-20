@@ -1,5 +1,8 @@
+![RobinBioMethod — From Literature to Protocol](assets/robin-biomethod-banner.png)
+
 # RobinBioMethod
 
+*Conceptual workflow: the software produces candidate methods and validation plans; synthesis and experimental validation are performed in the laboratory.*
 [中文说明](README.zh-CN.md)
 
 An independent Codex plugin for evidence-grounded **biomaterial synthesis methods plus

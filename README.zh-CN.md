@@ -1,5 +1,8 @@
+![RobinBioMethod — From Literature to Protocol](assets/robin-biomethod-banner.png)
+
 # RobinBioMethod
 
+*概念流程示意：软件交付候选方法和验证计划；材料合成与实际效果验证仍需在实验室完成。*
 基于 Harness² 的独立 Codex 插件，用于：
 
 **目标与实验约束 → 文献检索 → 方法取证 → INV／DOM 修正 → 候选 method＋最小验证实验。**
