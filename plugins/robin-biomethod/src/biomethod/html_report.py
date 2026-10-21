@@ -118,9 +118,9 @@ class Article:
         return body+'</article>'
     def trace(self,proof,comparison):
         # Node geometry is an explanatory logical diagram, not wall-clock scheduling evidence.
-        labels=[('Baseline',self.L('原始方法','Original method')),('INV',self.L('通用执行与检查','General execution')),('DOM',self.L('材料与科学约束','Domain reasoning')),('AGG',self.L('合成修改决定','Aggregate rule edits'))]
+        labels=[('Baseline',self.L('原始方法','Original method')),('INV',self.L('执行流程与检查','Workflow and checks')),('DOM',self.L('材料与科学约束','Domain reasoning')),('AGG',self.L('合成修改决定','Aggregate rule edits'))]
         marker=self.prefix+'trace-arrow'
-        boxes=[(5,65,160,70,self.L('基线','Baseline'),self.L('原始方法','Original method')),(270,13,170,70,'INV',self.L('通用执行与检查','General execution')),(270,117,170,70,'DOM',self.L('材料与科学约束','Domain reasoning')),(550,65,150,70,'AGG',self.L('合成修改决定','Aggregate edits')),(755,65,140,70,self.L('选择交付','Selection'),self.L('反思与保存','Reflect and save'))]
+        boxes=[(5,65,160,70,self.L('基线','Baseline'),self.L('原始方法','Original method')),(270,13,170,70,'INV',self.L('执行流程与检查','Workflow and checks')),(270,117,170,70,'DOM',self.L('材料与科学约束','Domain reasoning')),(550,65,150,70,'AGG',self.L('合并修订意见','Combine rule revisions')),(755,65,140,70,self.L('选择交付','Selection'),self.L('反思与保存','Reflect and save'))]
         body='<figure class="harness-map"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" role="img" aria-label="'+self.L('Baseline分别进入INV和DOM，两路修改合成AGG','Baseline branches to INV and DOM; both feed AGG')+'"><defs><marker id="'+marker+'" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#00685f"/></marker></defs><g fill="none" stroke="#00685f" stroke-width="2" marker-end="url(#'+marker+')"><path d="M165 100H210V48H270"/><path d="M210 100V152H270"/><path d="M440 48H490V100H550"/><path d="M440 152H490V100"/><path d="M700 100H755"/></g>'
         for x,y,w,h,title,subtitle in boxes:
             body+='<rect x="'+str(x)+'" y="'+str(y)+'" width="'+str(w)+'" height="'+str(h)+'" rx="6" fill="#eef3ef" stroke="#bdcec5"/><text x="'+str(x+w/2)+'" y="'+str(y+29)+'" text-anchor="middle" fill="#152e39" font-size="17">'+esc(title)+'</text><text x="'+str(x+w/2)+'" y="'+str(y+54)+'" text-anchor="middle" fill="#53676e" font-size="12">'+esc(subtitle)+'</text>'
@@ -162,25 +162,25 @@ def _article(language,pack,goal,data,literature,registry,proof,comparison,usage,
         sections.append((anchor,title,'<section id="'+R.prefix+anchor+'"><h2><b>'+str(len(sections)+1).zfill(2)+'</b>'+esc(title)+'</h2>'+body+'</section>'))
     target=goal.get('target',{});scale=goal.get('scale',{})
     brief=R.table([L('目标','Target'),L('允许偏差','Tolerance'),L('规模','Scale'),L('检测方式','Assay')],[[v(target.get('value'))+' '+R.text(target.get('unit','')),v(target.get('tolerance')),v(scale.get('value'))+' '+R.text(scale.get('unit','')),v(target.get('assay'))]])
-    brief+='<div class="finding"><span class="eyebrow">'+L('当前判断','Current assessment')+'</span><p>'+v(data.get('target_assessment',{}).get('reason'))+'</p></div>'
-    brief+=R.fold(L('完整目标、约束、假设与证据边界','Full aim, constraints, assumptions and evidence limits'),v(goal)+v(data.get('evidence_limitations',[])))
-    add('brief',L('目标与边界','Aim and boundaries'),brief)
+    brief+='<div class="finding"><span class="eyebrow">'+L('现有证据评估','Assessment of available evidence')+'</span><p>'+v(data.get('target_assessment',{}).get('reason'))+'</p></div>'
+    brief+=R.fold(L('目标定义、约束条件与证据局限','Target definitions, constraints and evidence limitations'),v(goal)+v(data.get('evidence_limitations',[])))
+    add('brief',L('合成目标与适用范围','Synthesis goal and scope'),brief)
     lit=''
     overview=pack.get('material_overview',{}).get(language)
     if overview:lit+='<p>'+esc(overview)+'</p>'
     for entry in literature.get('literature_review',[]):
-        lit+='<article><h3>'+R.text(entry.get('document',''))+'</h3>'+R.table([L('问题','Question'),L('文献理解','Literature understanding')],[[L(zh,en),v(entry.get(key))] for key,zh,en in [('why','为什么相关','Why relevant'),('how','采用什么方法','How conducted'),('what','结果与适用边界','Findings and applicability')]])
+        lit+='<article><h3>'+R.text(entry.get('document',''))+'</h3>'+R.table([L('问题','Question'),L('文献依据与方法分析','Literature and method analysis')],[[L(zh,en),v(entry.get(key))] for key,zh,en in [('why','与本任务的相关性','Relevance to this task'),('how','研究方法','Study methods'),('what','结果与适用边界','Findings and applicability')]])
         lit+=R.fold(L('原文引句与定位（保留原文）','Original quotations and locators'),v(entry.get('method_evidence',[])))+'</article>'
     if not lit:lit='<p>'+L('没有提供文献提取记录；不补写综述结论。','No literature extraction supplied; no review conclusions are invented.')+'</p>'
-    lit+=R.fold(L('缺失来源与补充材料','Missing sources and supplements'),v(literature.get('source_gaps',[])))
-    add('literature',L('文献理解','Literature understanding'),lit)
-    methods='<p>'+L('以下是待验证的候选方法。流程图说明步骤之间的顺序及准入条件；不是已执行的实验结果。','The following methods are candidates for validation. The flowchart shows sequence and readiness gates, not completed laboratory results.')+'</p>'
+    lit+=R.fold(L('未取得的文献与补充材料','Unavailable references and supplements'),v(literature.get('source_gaps',[])))
+    add('literature',L('文献依据与方法分析','Literature and method analysis'),lit)
+    methods='<p>'+L('候选方法尚待实验验证。流程图列出操作顺序、已知参数和执行前需确认的条件。','The candidate method requires experimental validation. The flowchart lists the steps, known parameters and conditions to confirm before execution.')+'</p>'
     methods+=''.join(R.method(m) for m in data.get('candidate_methods',[]))
-    methods+='<div id="'+R.prefix+'process">'+R.fold(L('候选方法如何形成：Baseline / INV / DOM / AGG','How the candidate was developed: Baseline / INV / DOM / AGG'),R.trace(proof,comparison))+'</div>'
+    methods+='<div id="'+R.prefix+'process">'+R.fold(L('方法生成与修订记录：Baseline / INV / DOM / AGG','Method development and revision record: Baseline / INV / DOM / AGG'),R.trace(proof,comparison))+'</div>'
     add('methods',L('候选合成方法','Candidate synthesis method'),methods)
-    unknowns=R.table([L('未知事项','Open question'),L('重要性','Importance'),L('需要回答的问题','Question to resolve')],[[esc(u.get('id','')),v(u.get('importance')),v(u.get('question'))] for u in data.get('uncertainties',[])])
+    unknowns=R.table([L('项目','Item'),L('重要性','Importance'),L('待确认内容','Details to confirm')],[[esc(u.get('id','')),v(u.get('importance')),v(u.get('question'))] for u in data.get('uncertainties',[])])
     unknowns+=R.fold(L('目标约束核对','Constraint assessments'),R.table([L('约束','Constraint'),L('状态','Status'),L('判断依据','Rationale')],[[esc(c.get('id','')),v(c.get('status')),v(c.get('reason'))] for c in data.get('constraint_assessments',[])]))
-    add('unknowns',L('尚未确定什么','What remains unresolved'),unknowns)
+    add('unknowns',L('待确认的参数与实验条件','Parameters and conditions to confirm'),unknowns)
     experiments=''
     roadmap=pack.get('experiment_roadmap',[])
     if roadmap:
@@ -188,18 +188,18 @@ def _article(language,pack,goal,data,literature,registry,proof,comparison,usage,
         for entry in roadmap:
             item=entry.get(language,{})
             experiments+='<li><b>'+esc(entry.get('id',''))+' · '+esc(item.get('label',''))+'</b></li>'
-        experiments+='</ol><p class="gate-note">'+L('此顺序来自当前实验设计；后续阶段须满足各自前置条件。','This sequence comes from the present experimental design; later stages retain their stated prerequisites.')+'</p></div>'
+        experiments+='</ol><p class="gate-note">'+L('按以下顺序安排验证，各阶段的执行条件见实验方案。','Validation follows the sequence below. Each study retains the prerequisites in its experimental plan.')+'</p></div>'
     rows=[]
     for e in data.get('validation_experiments',[]):
         summary=next((x.get(language,{}) for x in roadmap if x.get('id')==e.get('id')), {})
         rows.append([esc(e.get('id','')),esc(summary['label']) if summary.get('label') else v(e.get('hypothesis')),v([r.get('metric','') for r in e.get('readouts',[])]),esc(summary['resolves']) if summary.get('resolves') else v(e.get('uncertainty_ids',[])),v(e.get('independent_batches'))+' / '+v(e.get('technical_repeats'))])
-    experiments+=R.table([L('实验','Experiment'),L('验证什么','What it tests'),L('检测什么','What to measure'),L('完成后能明确什么','What it can resolve'),L('计划批次 / 技术重复','Planned batches / technical repeats')],rows)
-    experiments+='<p class="meta">'+L('这些是计划值，并非已完成实验。技术重复不等于独立合成批次；实验阈值须按各自的依据解释。','These are planned counts, not completed experiments. Technical repeats are not independent synthesis batches; interpret thresholds according to their stated basis.')+'</p>'
+    experiments+=R.table([L('实验','Experiment'),L('验证目的','Validation objective'),L('检测指标','Measurements'),L('拟解决的问题','Uncertainties addressed'),L('计划批次 / 技术重复','Planned batches / technical repeats')],rows)
+    experiments+='<p class="meta">'+L('表中列出计划批次与技术重复次数，本任务尚未开展实验。独立合成批次与技术重复分别统计，判定标准的依据见各实验方案。','The table gives planned batch and technical-repeat counts; no experiments have been performed in this task. Independent synthesis batches and technical repeats are counted separately. The basis for each acceptance criterion is given in the study plan.')+'</p>'
     for e in data.get('validation_experiments',[]):
         body='<h4>'+L('待检验假设与设计','Hypothesis and design')+'</h4>'+v({k:e.get(k) for k in ('hypothesis','method_ids','uncertainty_ids','controls','sampling','sample_size_rationale')})
-        body+='<h4>'+L('检测与接受条件','Readouts and acceptance conditions')+'</h4>'+R.table([L('指标','Metric'),L('检测方式 / 单位','Method / unit'),L('接受条件','Acceptance'),L('条件依据','Basis')],[[v(r.get('metric')),v(r.get('method'))+' / '+v(r.get('unit')),v(r.get('acceptance')),v(r.get('acceptance_basis'))] for r in e.get('readouts',[])])
+        body+='<h4>'+L('检测指标与判定标准','Measurements and acceptance criteria')+'</h4>'+R.table([L('指标','Metric'),L('检测方式 / 单位','Method / unit'),L('接受条件','Acceptance'),L('条件依据','Basis')],[[v(r.get('metric')),v(r.get('method'))+' / '+v(r.get('unit')),v(r.get('acceptance')),v(r.get('acceptance_basis'))] for r in e.get('readouts',[])])
         body+=R.table([L('判断','Decision'),L('内容','Content')],[[L(zh,en),v(e.get(k))] for k,zh,en in [('predicted_result','预期结果','Expected result'),('falsification','可证伪条件','Falsification'),('decision_rule','通过／失败／无法判断时的行动','Pass / fail / inconclusive actions')]])
-        experiments+=R.fold(e.get('id','')+' · '+L('对照、采样、接受条件与结果分支','Controls, sampling, acceptance and decisions'),body)
+        experiments+=R.fold(e.get('id','')+' · '+L('实验对照、采样与结果判定','Controls, sampling and result assessment'),body)
     add('experiments',L('最小验证实验','Minimal validation experiments'),experiments)
     profiles={r.get('id'):r for r in references.get('documents',[])};refs=''
     for doc in registry.get('documents',[]):
@@ -207,15 +207,15 @@ def _article(language,pack,goal,data,literature,registry,proof,comparison,usage,
         refs+='<article class="reference-assessment"><h3>'+esc(doc['id'])+' · '+(('<a href="'+esc(url)+'">'+title+'</a>') if url else title)+'</h3>'
         bibliography=R.table([L('期刊','Journal'),L('年份','Year'),L('引用次数','Citation count'),L('数据来源 / 获取时间','Provider / retrieved at')],[[esc(meta.get('journal') or L('未获取','Not retrieved')),esc(meta.get('year') or L('未获取','Not retrieved')),v(meta.get('citation_count')),esc(meta.get('provider','Europe PMC'))+' / '+esc(meta.get('retrieved_at') or L('未获取','Not retrieved'))]])
         refs+=bibliography
-        assessment_rows=[(L('全文可追溯性','Full-text traceability'),L('已登记全文，可核对原文引句；不等同于科学结论已复核。','Full text is registered and quotations can be checked; this does not certify scientific conclusions.')) if doc.get('access') in ('full_text','fulltext','fulltext_unreviewed') else (L('来源访问范围','Source access'),R.strings.get(str(doc.get('access')),str(doc.get('access'))) if language=='zh' else str(doc.get('access')))]
+        assessment_rows=[(L('全文与引文核对','Full text and quotation checks'),L('已登记全文，可核对原文引句；不等同于科学结论已复核。','Full text is registered and quotations can be checked; this does not certify scientific conclusions.')) if doc.get('access') in ('full_text','fulltext','fulltext_unreviewed') else (L('来源访问范围','Source access'),R.strings.get(str(doc.get('access')),str(doc.get('access'))) if language=='zh' else str(doc.get('access')))]
         for row in pack.get('reference_assessments',{}).get(doc['id'],[]):
             entry=row.get(language,{})
             assessment_rows.append((entry.get('dimension',''),entry.get('finding','')))
         assessment_rows.append((L('独立复现','Independent replication'),L('尚未核验引用论文是否实际复现本方法，不能据引用数判为高可信。','Citing papers have not been checked for actual replication; citation counts do not establish high method confidence.')))
-        assessment_rows.append((L('对本任务目标的支持','Support for this task target'),L('详见第一部分的目标判断；文献影响力不能替代目标相关的直接证据。','See the task assessment in Aim; scholarly influence cannot replace target-specific direct evidence.')))
-        refs+=R.table([L('证据维度','Evidence dimension'),L('评价与边界','Assessment and limits')],[[esc(a),esc(b)] for a,b in assessment_rows])
+        assessment_rows.append((L('对当前目标的支持程度','Support for the current target'),L('详见第一部分的目标判断；文献影响力不能替代目标相关的直接证据。','See the task assessment in Aim; scholarly influence cannot replace target-specific direct evidence.')))
+        refs+=R.table([L('评价项目','Assessment item'),L('证据评价与适用范围','Evidence assessment and scope')],[[esc(a),esc(b)] for a,b in assessment_rows])
         metadata_url=safe_url(meta.get('query_url',''))
-        refs+=R.fold(L('文献元数据、查询依据与文档检查','Bibliographic metadata, lookup provenance and document checks'),v({k:doc.get(k) for k in ('doi','access')})+('<p>'+L('许可标记：','License: ')+esc((re.search(r'CC BY(?:-[A-Z]+)* [0-9.]+',str(doc.get('license',''))) or (['CC BY 4.0'] if 'creativecommons.org/licenses/by/4.0' in str(doc.get('license','')) else ['未明确']))[0])+'</p>' if language=='zh' else v({'license':doc.get('license')}))+('<p><a href="'+esc(metadata_url)+'">'+L('查看引用量查询来源','View citation-count lookup')+'</a></p>' if metadata_url else '')+('<p>'+esc(meta.get('error',''))+'</p>' if language=='en' else '')+('<p>'+L('文档检查通过。其检查的是结构、算术和引用，不证明实验有效。','Document checks passed; they check structure, arithmetic and provenance, not experimental validity.')+'</p>' if assessment.get('valid') else '<p>'+L('文档检查未通过。','Document checks failed.')+'</p>')+(R.fold('Full machine check',v(assessment)) if language=='en' else ''))
+        refs+=R.fold(L('文献信息与核对记录','Reference details and verification record'),v({k:doc.get(k) for k in ('doi','access')})+('<p>'+L('许可标记：','License: ')+esc((re.search(r'CC BY(?:-[A-Z]+)* [0-9.]+',str(doc.get('license',''))) or (['CC BY 4.0'] if 'creativecommons.org/licenses/by/4.0' in str(doc.get('license','')) else ['未明确']))[0])+'</p>' if language=='zh' else v({'license':doc.get('license')}))+('<p><a href="'+esc(metadata_url)+'">'+L('查看引用量查询来源','View citation-count lookup')+'</a></p>' if metadata_url else '')+('<p>'+esc(meta.get('error',''))+'</p>' if language=='en' else '')+('<p>'+L('文档检查通过。其检查的是结构、算术和引用，不证明实验有效。','Document checks passed; they check structure, arithmetic and provenance, not experimental validity.')+'</p>' if assessment.get('valid') else '<p>'+L('文档检查未通过。','Document checks failed.')+'</p>')+(R.fold('Full machine check',v(assessment)) if language=='en' else ''))
         refs+='</article>'
     refs+='<p class="source-principle">'+L('引用次数反映传播与使用背景，不等于独立复现次数。期刊或影响因子不能替代对方法本身、适用条件和实验结果的审查。','Citation counts indicate scholarly attention, not independent replications. Journal metrics cannot replace assessment of a method, its conditions and experimental results.')+' <a href="https://sfdora.org/read/">'+L('评价原则参考','Assessment principles')+' · DORA</a></p>'
     add('sources',L('参考文献与证据评价','References and evidence assessment'),refs)

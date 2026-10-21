@@ -110,3 +110,13 @@ from citation influence. With authorization implicit in a request for citation e
 use the explicit metadata-refresh flag; otherwise rendering stays offline. Record database
 and date. Independent replication requires reviewing other groups' actual methods/results;
 never count citations as successful reproductions or manufacture a confidence probability.
+
+## Scientific wording review (humanizer-write)
+
+Before final delivery, read ../../references/scientific-wording.md and apply its scoped
+humanizer-write scientific mode to headings, labels and explanatory prose in both languages.
+Use concrete names such as "待确认的参数与实验条件", "验证目的" and "检测指标". Avoid vague
+question headings, redundant subtitles and promotional or self-explanatory prose. Preserve
+all conditions, uncertainty and evidence strength; do not add personality or novelty claims.
+The portable reference is bundled, so global humanizer-write installation is optional.
+Never rewrite frozen science or exact quotations as part of the wording pass.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 — 2026-10-21
+
+- Integrated humanizer-write scientific editing guidance as a portable report reference.
+- Concrete heading/table names replace vague question prompts in Chinese and English.
+- Clearer experiment captions and shorter explanations preserve scientific scope.
+- Frozen methods, numerical conditions, quotations and execution records unchanged.
+- Existing112 regression tests retained; saved HAMA wording and source hashes checked.
+
 ## 0.3.0 — 2026-10-21
 
 - Article order: Aim, literature, candidate method, open questions, experiments, references.

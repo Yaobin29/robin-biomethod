@@ -102,7 +102,7 @@ class HTMLReportTests(unittest.TestCase):
         self.assertIn('synthesis-flow',s);self.assertIn('Synthesis method logic flowchart',s)
         self.assertIn('svg',p.tags);self.assertGreater(p.tags.count('details'),10)
         self.assertFalse(any('open' in a for a in p.attrs))
-        self.assertIn('What it tests',s);self.assertIn('What to measure',s);self.assertIn('What it can resolve',s)
+        self.assertIn('Validation objective',s);self.assertIn('Measurements',s);self.assertIn('Uncertainties addressed',s)
     def test_all_scientific_content_retained_in_english_and_unknowns_visible(self):
         from html import escape
         s=self.generate()

@@ -86,3 +86,10 @@ Metadata tests cover exact identity, dated counts, unavailable lookups and inval
 Synthetic test translations test routing only; they are not scientific translation evidence.
 The live HAMA artifact has a separately reviewed local translation pack and metadata cache.
 No wet-lab validity or browser visual/print certification follows from these checks.
+
+## Editorial review
+
+Apply scientific-wording.md (the scoped humanizer-write integration) before delivery. Use
+concrete heading and table names. Keep content, numerical conditions and evidence strength
+unchanged. The preferred unresolved-items heading is "待确认的参数与实验条件" / "Parameters
+and conditions to confirm". This is an editing step, not another model or synthesis run.

@@ -121,3 +121,10 @@ experiment captions, a cached dated citation profile, and the unchanged original
 English-panel prose has no Chinese characters; Chinese-panel long English text is limited to
 original quotations/titles and technical notation. This is structural/content inspection, not
 a browser visual/print acceptance. No new model calls or independent replication claims.
+
+## 0.3.1 editorial check
+
+The existing112 tests pass after label updates. Saved HAMA reports retain their original
+scientific artifact hash, complete source-bound translations and unique anchors. Heading,
+column-label and disclosure-summary inspection confirms the requested noun phrases in
+both languages. No synthesis run, model worker or scientific-result rewrite is involved.
