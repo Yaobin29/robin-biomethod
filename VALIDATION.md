@@ -110,3 +110,14 @@ branch/merge logic, experiment decision/acceptance tables, complete quote/readou
 and unique method anchors across stage/final views. Real saved HAMA input is reused with
 zero model calls. All scientific JSON and execution receipts are unchanged. Browser visual
 inspection remains unverified due to the previously blocked local-file navigation.
+
+## 0.3.0 article and language validation
+
+112 local tests on Python 3.12/3.13 cover article order, semantic synthesis flow, separate
+language panels, numeric preservation, missing/stale/passthrough translations, Chinese-source
+English requirements, anchors, quote/readout retention and metadata unknown/failure cases.
+The local live HAMA report contains 277 source-bound translation strings, faithful step and
+experiment captions, a cached dated citation profile, and the unchanged original method SHA.
+English-panel prose has no Chinese characters; Chinese-panel long English text is limited to
+original quotations/titles and technical notation. This is structural/content inspection, not
+a browser visual/print acceptance. No new model calls or independent replication claims.

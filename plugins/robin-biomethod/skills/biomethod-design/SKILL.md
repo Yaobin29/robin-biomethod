@@ -89,3 +89,24 @@ Final HTML follows progressive disclosure: current judgment, method parameters a
 experiment comparisons remain visible; citations, arithmetic, raw rules, prior stage
 methods and accounting start folded. Use semantic tables and branch/merge diagrams,
 not recursive field dumps. Preserve scientific content and visibly unknown conditions.
+
+## Article structure and bilingual completion
+
+Final reports follow Aim → literature → candidate method → unresolved questions → minimal
+experiments → references. Nest the Harness2 trace within candidate-method support. Include
+a synthesis logic flowchart with named real steps, conditional gates and visible unknowns.
+Explain each experiment's test, measurements and what it can resolve before its full design.
+Use one material-specific heading. Do not repeat a decorative subtitle or a second cover.
+
+For Chinese/English delivery, the host must prepare the complete source-bound translation
+pack following ../../references/html-report.md and check report-presentation.json says
+localization_complete=true. Changing headings alone is never a Chinese edition. Never
+start another model session implicitly for translation or reset the scientific budget.
+Original quotations, titles and technical notation may retain their original language.
+If translation is not prepared, identify that gap and label the source view honestly.
+
+Reference confidence separates directness/completeness/within-study repeats/task relevance
+from citation influence. With authorization implicit in a request for citation evaluation,
+use the explicit metadata-refresh flag; otherwise rendering stays offline. Record database
+and date. Independent replication requires reviewing other groups' actual methods/results;
+never count citations as successful reproductions or manufacture a confidence probability.

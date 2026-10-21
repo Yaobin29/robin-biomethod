@@ -1,18 +1,24 @@
-"""Offline editorial reports, rendered from structured artifacts without model calls.
-
-Design adapts local frontend-design typography/composition and frontend-skill
-navigation principles. No global skill, JavaScript, font service or CDN is required.
-All source strings are untrusted; never interpolate them as markup or active URLs.
-"""
+"""Article-style, source-bound bilingual reports; no scripts or model calls."""
 from __future__ import annotations
 from html import escape
-from datetime import datetime, timezone
-import hashlib
+from datetime import datetime,timezone
 from pathlib import Path
+import hashlib
+import json
+import re
 from urllib.parse import urlsplit
 from .workflow import read
 from .validation import assess
+from .report_language import report_payload,content_hash,required_strings,validate_localization
 
+
+def esc(value):return escape(str(value),quote=True)
+
+
+def safe_url(url):
+    try:
+        p=urlsplit(str(url));return str(url) if p.scheme.lower() in ('http','https') and p.netloc else None
+    except ValueError:return None
 CSS = '''
 :root{--ink:#152e39;--muted:#53676e;--accent:#00685f;--paper:#fffdf8;--line:#d7ded9;--wash:#eef3ef;--warning:#7a4215}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 "Avenir Next","PingFang SC","Microsoft YaHei",sans-serif}a{color:var(--accent);text-underline-offset:4px}a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}.skip{position:absolute;top:-80px}.skip:focus{top:8px;background:white;z-index:5;padding:12px}.shell{max-width:1500px;margin:auto;display:grid;grid-template-columns:240px minmax(0,1fr)}nav{padding:40px 26px;position:sticky;top:0;height:100vh;border-right:1px solid var(--line)}.brand{font-weight:800;font-size:20px;letter-spacing:-.8px}.brand i{color:var(--accent);font-style:normal}nav small,.eyebrow{display:block;color:var(--accent);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700}nav ol{list-style:none;padding:36px 0;margin:0}nav li{margin:16px 0}nav a{text-decoration:none;font-size:14px}nav .note{font-size:12px;color:var(--muted)}main{min-width:0;padding:48px 5vw 72px}header{padding-bottom:36px;border-bottom:2px solid var(--ink)}h1,h2{font-family:"Iowan Old Style","Songti SC",Georgia,serif;font-weight:500;letter-spacing:-1px}h1{font-size:clamp(38px,5vw,66px);line-height:1.15;margin:22px 0}h1 span{color:var(--accent)}.lead{font-size:19px;color:var(--muted);max-width:760px}.meta{font-size:13px;color:var(--muted)}section{padding:38px 0;border-bottom:1px solid var(--line)}h2{font-size:31px;line-height:1.4;margin:0 0 24px}h2 b{font:12px "Avenir Next",sans-serif;color:var(--accent);display:block;letter-spacing:2px;margin-bottom:8px}h3{font-size:19px;margin:24px 0 12px}h4{font-size:16px;margin:20px 0 8px}.notice{border-left:3px solid var(--warning);padding:16px 20px;background:#fbf0df;color:#653911;margin:24px 0}.stamp{display:inline-block;color:var(--accent);border:1px solid var(--accent);padding:3px 10px;font-size:12px}.stamp.warn{color:var(--warning);border-color:var(--warning)}.flow{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}.flow span{border-bottom:2px solid var(--accent);padding:8px 12px;font-size:13px}.fields{margin:0}.fields>div{display:grid;grid-template-columns:minmax(120px,23%) minmax(0,1fr);gap:18px;padding:10px 0;border-bottom:1px solid #e6e9e3}dt{font-size:13px;color:var(--muted)}dd{margin:0;min-width:0;overflow-wrap:anywhere}p{overflow-wrap:anywhere}ul{padding-left:21px}li{margin:7px 0}.table-wrap{overflow-x:auto;max-width:100%;margin:16px 0}table{border-collapse:collapse;width:100%;font-size:14px;min-width:580px;text-align:left}th{background:var(--wash);font-size:12px;color:var(--muted);font-weight:700}td,th{padding:12px;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}td .fields>div{display:block}td dt{font-size:11px}details{margin:12px 0;padding:10px 16px;background:var(--wash)}summary{cursor:pointer;font-size:14px;font-weight:600}article{margin:28px 0;padding-top:12px}article+article{border-top:1px solid var(--line)}.step{padding:14px 0}.step h4{color:var(--accent)}footer{padding-top:24px;font-size:12px;color:var(--muted)}code{font-size:12px;overflow-wrap:anywhere}pre{white-space:pre-wrap;font-size:12px;overflow-wrap:anywhere}::selection{background:#cee3d8}
@@ -24,179 +30,251 @@ CSS += '\n/* Reading hierarchy v2: conclusions and comparison tables first, supp
 
 CSS += '.decision-map{border-top:2px solid var(--accent);margin:22px 0}.decision-start{padding:14px;background:var(--wash);font-size:14px}.decision-branches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.decision-branches p{font-size:12px;border-top:1px solid var(--line);padding-top:10px}.decision-branches b{display:block;font-size:14px;margin-bottom:8px}.decision-branches span{color:var(--muted)}@media(max-width:650px){.decision-branches{grid-template-columns:1fr;gap:0}}'
 
-LABELS = dict(target='目标', scale='规模与基准', raw_material='起始材料', equipment='设备', unknown_fields='未确定条件',
-              application='应用', metric='指标', value='数值', unit='单位', tolerance='允许偏差', definition='定义', assay='测定方法',
-              basis='基准', status='状态', reason='判断依据', inputs='原料与设备', checkpoints='过程检查', characterization='表征', gaps='证据缺口',
-              hypothesis='待检验假设', controls='对照', independent_batches='独立合成批次', technical_repeats='每批技术重复',
-              sample_size_rationale='样本数依据', sampling='采样', readouts='读出与接受条件', predicted_result='预测结果',
-              falsification='可证伪条件', decision_rule='通过／失败／不确定时的行动', method_ids='对应方法', uncertainty_ids='对应未知事项',
-              document='来源编号', locator='定位', quote='原文引句', origin='依据类型', evidence='原文证据', assumptions='假设',
-              expression='计算表达式', name='名称', acceptance='接受条件', acceptance_basis='条件依据', method='测定方法',
-              why='Why · 研究意义', how='How · 方法', what='What · 结果与边界', method_evidence='方法证据',
-              source_gaps='未获得的来源', importance='重要性', question='问题', disposition='处置', route_id='来源路线',
-              errors='检查错误', warnings='检查边界', valid='文档检查通过', scientific_validity='科学有效性', score='文档检查分数')
+
+CSS += '''
+.language-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 30px;border-bottom:1px solid var(--line);background:var(--paper)}.language-options{display:flex;gap:6px}.language-options label{padding:5px 14px;border:1px solid var(--line);border-radius:3px;cursor:pointer;font-size:13px}.language-control{position:absolute;left:-10000px}#lang-zh:checked~.language-bar label[for="lang-zh"],#lang-en:checked~.language-bar label[for="lang-en"]{background:var(--accent);color:white}#lang-zh:focus-visible~.language-bar label[for="lang-zh"],#lang-en:focus-visible~.language-bar label[for="lang-en"]{outline:3px solid var(--warning);outline-offset:3px}#lang-zh:checked~.report-en,#lang-en:checked~.report-zh{display:none}.language-options label.unavailable{opacity:.5;cursor:not-allowed}h1{font-size:34px;margin:12px 0}.eyebrow{letter-spacing:1px}blockquote{border-left:2px solid var(--line);padding:5px 12px;margin:10px 0;font-size:13px;color:var(--muted)}.synthesis-flow{counter-reset:flow;list-style:none;padding:0;margin:20px 0}.synthesis-flow>li{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:14px;padding:0 0 20px}.synthesis-flow>li:not(:last-child)::before{content:"";position:absolute;left:17px;top:32px;bottom:0;border-left:2px solid var(--line)}.flow-index{position:relative;z-index:1;border:1px solid var(--accent);border-radius:50%;background:var(--paper);color:var(--accent);width:36px;height:36px;text-align:center;line-height:34px;font-size:12px}.flow-step{padding:12px 16px;background:var(--wash);border-radius:4px}.flow-step h4{margin:0 0 6px;font-size:16px}.flow-step p{font-size:13px;margin:6px 0}.gate-note{border-left:2px solid var(--warning);padding-left:10px;color:var(--warning);font-size:12px}.experiment-roadmap{border-top:2px solid var(--accent);padding-top:12px;margin:22px 0}.experiment-roadmap ol{padding-left:22px}.experiment-roadmap li{margin:10px 0}.badge{display:inline-block;padding:2px 8px;border:1px solid var(--line);font-size:11px}.reference-assessment{margin:18px 0}.source-principle{font-size:13px;color:var(--muted)}.run-note{font-size:12px;color:var(--muted)}.report .meta{max-width:100%}@media print{.language-bar{display:none}.report-en,.report-zh{display:block}#lang-zh:checked~.report-en,#lang-en:checked~.report-zh{display:none}.synthesis-flow>li{break-inside:avoid}}@media(max-width:650px){.language-bar{padding:12px 18px}.brand{font-size:17px}h1{font-size:29px}.flow-step{padding:10px 12px}}
+'''
+
+CSS += '.synthesis-flow>li:not(:last-child)::after{content:"";position:absolute;left:13px;bottom:2px;border:5px solid transparent;border-top-color:var(--accent)}'
+
+FIELDS={
+ 'target':('目标','Target'),'scale':('规模与基准','Scale and basis'),'application':('用途','Application'),'constraints':('约束','Constraints'),
+ 'schema_version':('数据格式版本','Schema version'),'material':('材料','Material'),'metric':('指标','Metric'),'value':('数值','Value'),
+ 'unit':('单位','Unit'),'tolerance':('允许偏差','Tolerance'),'definition':('定义','Definition'),'assay':('测定方式','Assay'),'basis':('基准','Basis'),
+ 'available_equipment':('可用设备','Available equipment'),'unknown_fields':('未确定条件','Unknown fields'),'assumption_notes':('场景假设','Scenario assumptions'),
+ 'id':('编号','ID'),'kind':('类型','Type'),'description':('说明','Description'),'status':('状态','Status'),'reason':('判断依据','Rationale'),
+ 'inputs':('原料与设备','Inputs and equipment'),'checkpoints':('过程检查','Checkpoints'),'characterization':('表征','Characterization'),'gaps':('方法缺口','Method gaps'),
+ 'evidence_limitations':('证据边界','Evidence limitations'),'origin':('依据类型','Origin'),'expression':('计算表达式','Expression'),
+ 'evidence':('证据','Evidence'),'document':('来源编号','Document'),'locator':('定位','Locator'),'quote':('原文引句','Original quotation'),
+ 'assumptions':('假设','Assumptions'),'rationale':('依据','Rationale'),'uncertainty':('对应未知事项','Uncertainty'),'uncertainty_ids':('对应未知事项','Uncertainty IDs'),
+ 'calculation':('计算','Calculation'),'source':('来源','Source'),'note':('说明','Note'),'notes':('说明','Notes'),'limitations':('局限','Limitations'),
+ 'method_ids':('对应方法','Method IDs'),'hypothesis':('待检验假设','Hypothesis'),'controls':('对照','Controls'),'sampling':('采样','Sampling'),
+ 'independent_batches':('独立合成批次','Independent synthesis batches'),'technical_repeats':('每批技术重复','Technical repeats per batch'),
+ 'sample_size_rationale':('批次与重复数依据','Batch and repeat rationale'),'predicted_result':('预期结果','Expected result'),
+ 'falsification':('可证伪条件','Falsification'),'decision_rule':('结果分支','Decision rule'),'acceptance':('接受条件','Acceptance'),
+ 'acceptance_basis':('条件依据','Basis for acceptance'),'readouts':('读出','Readouts'),'method':('检测方法','Measurement method'),
+ 'target_assessment':('目标判断','Target assessment'),'constraint_assessments':('约束核对','Constraint assessments'),'uncertainties':('未确定事项','Uncertainties'),
+ 'importance':('重要性','Importance'),'question':('问题','Question'),'valid':('文档检查通过','Document checks passed'),'score':('文档检查分数','Document score'),
+ 'scientific_validity':('科学有效性','Scientific validity'),'errors':('检查错误','Check errors'),'warnings':('检查边界','Check limitations'),
+ 'critical':('关键错误','Critical errors'),'adoptable':('可直接采用','Adoptable'),'route_id':('来源路线','Source route'),'disposition':('处置','Disposition'),
+ 'why':('为什么相关','Why relevant'),'how':('采用什么方法','How conducted'),'what':('结果与边界','Findings and limits'),'method_evidence':('方法证据','Method evidence'),
+ 'source_gaps':('未取得的来源','Missing source material'),'title':('标题','Title'),'url':('链接','URL'),'doi':('DOI','DOI'),
+ 'access':('访问范围','Access'),'path':('本地路径','Local path'),'sha256':('校验值','SHA-256'),'license':('许可','License'),
+}
 
 
-def esc(value):
-    return escape(str(value), quote=True)
-
-
-def value_html(value):
-    """Lossless field rendering; null is always visibly unknown, never blank."""
-    if value is None:
-        return '<strong class="unknown">未确定</strong>'
-    if isinstance(value, bool):
-        return '是' if value else '否'
-    if isinstance(value, dict):
-        return '<dl class="fields">'+''.join('<div><dt>'+esc(LABELS.get(k,k))+'</dt><dd>'+value_html(v)+'</dd></div>' for k,v in value.items())+'</dl>'
-    if isinstance(value, list):
-        return '<ul>'+''.join('<li>'+value_html(v)+'</li>' for v in value)+'</ul>' if value else '<span class="meta">无记录</span>'
-    return esc(value).replace('\n','<br>')
-
-
-def table(head, rows):
-    return '<div class="table-wrap" tabindex="0" role="region" aria-label="数据表，可横向滚动"><table><thead><tr>'+''.join('<th scope="col">'+esc(h)+'</th>' for h in head)+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+c+'</td>' for c in row)+'</tr>' for row in rows)+'</tbody></table></div>'
-
-
-def fold(title, body):
-    return '<details class="support"><summary>'+esc(title)+'</summary><div class="detail-body">'+body+'</div></details>'
-
-
-def compact(value):
-    return value_html(value)
-
-
-def method_html(method, namespace="final"):
-    method_key=namespace+str(method.get("id",""))
-    text='<article class="method"><h3>'+esc(method.get('id','方法'))+' <span class="meta">'+esc(method.get('route_id',''))+'</span></h3>'
-    steps=method.get('steps',[])
-    text+='<p class="meta">'+str(len(steps))+' 个步骤 · 参数在正文中查看；出处与计算按需展开。</p>'
-    text+=fold('原料、设备、过程检查与方法缺口',value_html({k:v for k,v in method.items() if k!='steps'}))
-    text+='<ol class="route-flow" aria-label="合成步骤概览">'+''.join('<li><span>'+str(i).zfill(2)+'</span><a href="#method-'+hashlib.sha256(method_key.encode()).hexdigest()[:8]+'-'+str(i)+'">步骤 '+str(i)+' · '+str(len(step.get('parameters',[])))+' 项参数</a></li>' for i,step in enumerate(steps,1))+'</ol>'
-    for i,step in enumerate(steps,1):
-        anchor='method-'+hashlib.sha256(method_key.encode()).hexdigest()[:8]+'-'+str(i)
-        text+='<div class="step" id="'+anchor+'"><h4><span class="step-no">'+str(i).zfill(2)+'</span>'+esc(step.get('action','步骤'))+'</h4>'
+class Article:
+    def __init__(self,language,pack=None):
+        self.language=language;self.pack=pack or {};self.strings={'full_text':'全文','fulltext':'全文','curated_excerpt':'已登记摘录',**self.pack.get('zh',{})};self.prefix=language+'-'
+    def L(self,zh,en):return zh if self.language=='zh' else en
+    def text(self,value,key=''):
+        text=str(value)
+        if key not in ('quote','title','url','doi','path','sha256'):
+            mapping=self.strings if self.language=='zh' else self.pack.get('en',{})
+            text=mapping.get(text,text)
+        return esc(text).replace('\n','<br>')
+    def value(self,value,key=''):
+        if value is None:return '<strong class="unknown">'+self.L('未确定','Unknown')+'</strong>'
+        if isinstance(value,bool):return self.L('是','Yes') if value else self.L('否','No')
+        if isinstance(value,dict):
+            return '<dl class="fields">'+''.join('<div><dt>'+esc(self.L(*FIELDS[k]) if k in FIELDS else k.replace('_',' '))+'</dt><dd>'+self.value(v,k)+'</dd></div>' for k,v in value.items())+'</dl>'
+        if isinstance(value,list):return '<ul>'+''.join('<li>'+self.value(v,key)+'</li>' for v in value)+'</ul>' if value else '<span class="meta">'+self.L('无记录','Not recorded')+'</span>'
+        if key=='quote':return '<blockquote lang="en">'+self.text(value,key)+'</blockquote>'
+        return self.text(value,key)
+    def table(self,headers,rows):
+        return '<div class="table-wrap" tabindex="0" role="region" aria-label="'+self.L('数据表，可横向滚动','Data table; scroll horizontally if needed')+'"><table><thead><tr>'+''.join('<th scope="col">'+esc(h)+'</th>' for h in headers)+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+c+'</td>' for c in row)+'</tr>' for row in rows)+'</tbody></table></div>'
+    def fold(self,title,body):return '<details class="support"><summary>'+esc(title)+'</summary><div class="detail-body">'+body+'</div></details>'
+    def link(self,anchor,label):return '<a href="#'+self.prefix+anchor+'">'+esc(label)+'</a>'
+    def flow(self,method,namespace):
+        presentation=self.pack.get('method_flow',{}).get(method.get('id'),[])
+        steps=method.get('steps',[]);items=[]
+        for i,step in enumerate(steps):
+            note=presentation[i] if len(presentation)==len(steps) else {}
+            label=note.get(self.language,{}).get('label') or self.L('步骤 '+str(i+1),'Step '+str(i+1))
+            # Conditions come directly from the original parameters; never retype numeric values.
+            params=step.get('parameters',[])
+            known=[p for p in params if p.get('value') is not None and len(str(p['value']))<90 and 'sum(' not in str(p['value'])]
+            selected=known[:2]
+            conditions='; '.join(self.text(p.get('name'))+' = '+self.value(p.get('value'))+' '+self.text(p.get('unit','')) for p in selected)
+            unknown=sum(p.get('value') is None for p in params)
+            gate=self.L('仍有 '+str(unknown)+' 项参数未确定；见下方步骤表。',str(unknown)+' parameters remain unknown; see step table below.') if unknown else self.L('具体执行条件见步骤表；文献值不等于已验证结果。','See the step table for execution conditions; reported values are not verified outcomes.')
+            desc=note.get(self.language,{}).get('purpose')
+            if not desc:desc=self.strings.get(step.get('action',''),step.get('action','')) if self.language=='zh' else step.get('action','')
+            anchor=self.prefix+namespace+'-step-'+str(i+1)
+            items.append('<li><span class="flow-index">'+str(i+1).zfill(2)+'</span><div class="flow-step"><h4><a href="#'+anchor+'">'+esc(label)+'</a></h4><p>'+esc(desc)+'</p><p>'+conditions+'</p><div class="gate-note">'+gate+'</div></div></li>')
+        return '<ol class="synthesis-flow" aria-label="'+self.L('合成方法逻辑流程图','Synthesis method logic flowchart')+'">'+''.join(items)+'</ol>'
+    def method(self,method,namespace='final',flow=True):
+        namespace=namespace+'-'+hashlib.sha256(str(method.get('id','')).encode()).hexdigest()[:8]
+        body='<article class="method"><h3>'+self.text(method.get('id',''))+'</h3>'
+        if flow:body+=self.flow(method,namespace)
+        body+=self.fold(self.L('原料、设备、过程检查与表征','Inputs, equipment, checkpoints and characterization'),self.value({k:v for k,v in method.items() if k!='steps'}))
+        for i,step in enumerate(method.get('steps',[]),1):
+            body+='<div class="step" id="'+self.prefix+namespace+'-step-'+str(i)+'"><h4><span class="step-no">'+str(i).zfill(2)+'</span>'+self.text(step.get('action',''))+'</h4>'
+            rows=[]
+            for param in step.get('parameters',[]):
+                extra={k:v for k,v in param.items() if k not in ('name','value','unit','origin')}
+                rows.append([self.text(param.get('name','')),self.value(param.get('value'))+' <span class="meta">'+self.text(param.get('unit',''))+'</span>',self.text(param.get('origin','')),self.fold(self.L('依据与计算','Evidence and calculation'),self.value(extra))])
+            body+=self.table([self.L('参数','Parameter'),self.L('数值 / 单位','Value / unit'),self.L('依据类型','Origin'),self.L('支撑材料','Supporting material')],rows)+'</div>'
+        return body+'</article>'
+    def trace(self,proof,comparison):
+        # Node geometry is an explanatory logical diagram, not wall-clock scheduling evidence.
+        labels=[('Baseline',self.L('原始方法','Original method')),('INV',self.L('通用执行与检查','General execution')),('DOM',self.L('材料与科学约束','Domain reasoning')),('AGG',self.L('合成修改决定','Aggregate rule edits'))]
+        marker=self.prefix+'trace-arrow'
+        boxes=[(5,65,160,70,self.L('基线','Baseline'),self.L('原始方法','Original method')),(270,13,170,70,'INV',self.L('通用执行与检查','General execution')),(270,117,170,70,'DOM',self.L('材料与科学约束','Domain reasoning')),(550,65,150,70,'AGG',self.L('合成修改决定','Aggregate edits')),(755,65,140,70,self.L('选择交付','Selection'),self.L('反思与保存','Reflect and save'))]
+        body='<figure class="harness-map"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" role="img" aria-label="'+self.L('Baseline分别进入INV和DOM，两路修改合成AGG','Baseline branches to INV and DOM; both feed AGG')+'"><defs><marker id="'+marker+'" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#00685f"/></marker></defs><g fill="none" stroke="#00685f" stroke-width="2" marker-end="url(#'+marker+')"><path d="M165 100H210V48H270"/><path d="M210 100V152H270"/><path d="M440 48H490V100H550"/><path d="M440 152H490V100"/><path d="M700 100H755"/></g>'
+        for x,y,w,h,title,subtitle in boxes:
+            body+='<rect x="'+str(x)+'" y="'+str(y)+'" width="'+str(w)+'" height="'+str(h)+'" rx="6" fill="#eef3ef" stroke="#bdcec5"/><text x="'+str(x+w/2)+'" y="'+str(y+29)+'" text-anchor="middle" fill="#152e39" font-size="17">'+esc(title)+'</text><text x="'+str(x+w/2)+'" y="'+str(y+54)+'" text-anchor="middle" fill="#53676e" font-size="12">'+esc(subtitle)+'</text>'
+        body+='</svg></figure>'
         rows=[]
-        for param in step.get('parameters',[]):
-            origin=param.get('origin','')
-            origin_label={'reported':'文献报告','calculated':'计算值','proposed':'提出值','unknown':'未确定','assumed':'假设'}.get(origin,origin)
-            support={k:v for k,v in param.items() if k not in ('name','value','unit','origin')}
-            rows.append([esc(param.get('name','')),value_html(param.get('value'))+' <span class="meta">'+esc(param.get('unit',''))+'</span>',
-                         '<span title="'+esc(origin)+'">'+esc(origin_label)+'</span>',fold('依据与计算',value_html(support)) if support else '<span class="meta">无记录</span>'])
-        text+=table(['参数','数值 / 单位','依据类型','支撑材料'],rows)
-        extra={k:v for k,v in step.items() if k not in ('action','parameters')}
-        if extra:text+=fold('步骤补充说明',value_html(extra))
-        text+='</div>'
-    return text+'</article>'
+        for stage in comparison.get('stages',[]):
+            valid=stage.get('assessment',{}).get('valid')
+            rows.append([esc(stage.get('label','')),self.value(stage.get('executed')),self.value(valid),str(len(stage.get('parameter_changes',[])))])
+        body+=self.table([self.L('阶段','Stage'),self.L('实际执行','Executed'),self.L('文档检查通过','Document check passed'),self.L('参数变化数','Parameter changes')],rows)
+        body+='<p class="meta">'+self.L('参数未改变不代表阶段未运行。阶段检查与实验有效性是不同判断。','Unchanged parameters do not mean a stage was skipped. Document checks do not establish experimental validity.')+'</p>'
+        for edit in comparison.get('rule_edits',proof.get('rule_edits',[])):
+            label=edit.get('label','')
+            note=self.pack.get('rule_summaries',{}).get(label,{})
+            content=note.get(self.language) if note else None
+            if content is None:content=edit.get('notes','') if self.language=='en' else self.L('原始规则记录保留在英文视图及执行报告中。','')
+            body+=self.fold(label+' · '+self.L('规则修改','Rule changes'),'<p>'+esc(content)+'</p>')
+        # Full stage artifacts remain in the English archival view; never pretend they were translated.
+        if self.language=='en':
+            for stage in comparison.get('stages',[]):
+                path=Path(stage['artifact']) if stage.get('artifact') else None
+                if path and path.is_file():
+                    try:
+                        data=read(path);details=self.value(stage.get('assessment',{}))+self.value(stage.get('parameter_changes',[]))
+                        details+=self.fold('Actual stage method',''.join(self.method(m,stage.get('label','stage'),False) for m in data.get('candidate_methods',[])))
+                        details+=self.fold('Stage experiments and other fields',self.value({k:v for k,v in data.items() if k!='candidate_methods'}))
+                        body+=self.fold(stage.get('label','')+' · original stage archive',details)
+                    except (ValueError,OSError,TypeError,AttributeError) as exc:body+='<p>'+esc(exc)+'</p>'
+        else:
+            body+='<p class="run-note">完整阶段方法为英文原始归档，可在英文视图查看；中文视图保留执行与变化摘要。</p>'
+        summary={k:proof.get(k) for k in ('selected','reflection_executed','delivery_repair_executed','model_sessions_attempted','model_sessions_verified')}
+        if self.language=='en':body+=self.fold('Selection and execution receipts',self.value(proof))
+        else:body+=self.table(['记录','结果'],[['最终交付',esc(str(summary['selected']))],['反思已执行',self.value(summary['reflection_executed'])],['另行交付修复',self.value(summary['delivery_repair_executed'])],['记录的模型会话数',self.value(summary['model_sessions_attempted'])]])
+        return body
 
 
-def harness_diagram():
-    # This is a conceptual branch/merge map, not an assertion of wall-clock parallelism.
-    return '''<figure class="harness-map"><svg viewBox="0 0 900 200" role="img" aria-label="Baseline分别进入INV和DOM，两路修改合成AGG，再选择交付；示意逻辑关系，不代表并行执行时间。" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#00685f"/></marker></defs><g fill="none" stroke="#00685f" stroke-width="2" marker-end="url(#arrow)"><path d="M165 100H210V48H270"/><path d="M210 100V152H270"/><path d="M440 48H490V100H550"/><path d="M440 152H490V100"/><path d="M700 100H755"/></g><g fill="#f0f5f1" stroke="#bdcec5"><rect x="5" y="65" width="160" height="70" rx="6"/><rect x="270" y="13" width="170" height="70" rx="6"/><rect x="270" y="117" width="170" height="70" rx="6"/><rect x="550" y="65" width="150" height="70" rx="6"/><rect x="755" y="65" width="140" height="70" rx="6"/></g><g fill="#152e39" text-anchor="middle" font-family="sans-serif" font-size="17"><text x="85" y="94">Baseline</text><text x="85" y="119" font-size="12">原始方法</text><text x="355" y="43">INV</text><text x="355" y="67" font-size="12">通用执行与检查</text><text x="355" y="147">DOM</text><text x="355" y="171" font-size="12">材料与科学约束</text><text x="625" y="94">AGG</text><text x="625" y="119" font-size="12">合成修改决定</text><text x="825" y="94">选择交付</text><text x="825" y="119" font-size="12">反思与保存</text></g></svg><figcaption>逻辑关系示意：两类修改在 AGG 汇合；实际执行及检查结果见下表。</figcaption></figure>'''
-
-
-def safe_url(url):
-    """Allow only browser HTTP(S) navigation; reject data/javascript/file schemes."""
-    try:
-        parsed=urlsplit(str(url))
-        return str(url) if parsed.scheme.lower() in ('http','https') and parsed.netloc else None
-    except ValueError:
-        return None
-
-
-def render_html(source, artifact, out, *, proof=None, comparison=None, literature=None, usage=None):
-    source=Path(source);out=Path(out)
-    data=read(artifact);goal=read(source/'goal.json');registry=read(source/'registry.json')
-    result=assess(source,Path(artifact))
-    proof=proof or {};comparison=comparison or {};literature=literature or {}
-    # Presentation cannot certify a workflow: only an explicit verified execution proof
-    # distinguishes it from a standalone render/curated demo.
-    verified=proof.get('verified') is True
-    state='核心执行证据已核验' if verified else '未完成全流程核验 / 仅文档呈现'
-    sections=[]
-    def section(anchor,number,title,body):
-        sections.append((anchor,title,'<section id="'+anchor+'"><h2><b>'+number+'</b>'+title+'</h2>'+body+'</section>'))
+def _article(language,pack,goal,data,literature,registry,proof,comparison,usage,assessment,references,artifact_hash):
+    R=Article(language,pack);L=R.L;v=R.value;sections=[]
+    def add(anchor,title,body):
+        sections.append((anchor,title,'<section id="'+R.prefix+anchor+'"><h2><b>'+str(len(sections)+1).zfill(2)+'</b>'+esc(title)+'</h2>'+body+'</section>'))
     target=goal.get('target',{});scale=goal.get('scale',{})
-    summary=table(['目标值','允许偏差','规模','测定方式'],[[compact(target.get('value'))+' '+esc(target.get('unit','')),compact(target.get('tolerance')),compact(scale.get('value'))+' '+esc(scale.get('unit','')),compact(target.get('assay'))]])
-    summary+='<div class="finding"><span class="eyebrow">当前判断 · '+esc(data.get('target_assessment',{}).get('status','未确定'))+'</span><p>'+compact(data.get('target_assessment',{}).get('reason','未提供目标判断。'))+'</p></div>'
-    summary+='<p class="meta">阅读路径：先看当前判断 → 候选方法 → 最小实验；文献与过程用于追溯。</p><div class="jump-links"><a href="#methods">查看候选方法 ↓</a><a href="#experiments">查看最小实验 ↓</a><a href="#unknowns">查看未确定事项 ↓</a></div>'
-    summary+=fold('完整目标、约束、假设与证据边界',value_html(goal)+value_html(data.get('evidence_limitations',[]))+value_html({k:v for k,v in data.items() if k not in ('candidate_methods','target_assessment','evidence_limitations','validation_experiments','constraint_assessments','uncertainties')}))
-    section('brief','01 / DESIGN BRIEF','目标与证据边界',summary)
-    lit=literature.get('literature_review',[])
-    lit_text='<p class="section-intro">先看每篇文献回答了什么；方法原文与定位信息折叠保留。</p>'
-    for entry in lit:
-        lit_text+='<article><h3>'+esc(entry.get('document','文献'))+'</h3>'+table(['问题','文献提取结果'],[[esc(label),compact(entry.get(key))] for key,label in [('why','为什么相关'),('how','采用什么方法'),('what','结果与适用边界')]])
-        lit_text+=fold('展开原文证据与定位',value_html({k:v for k,v in entry.items() if k not in ('document','why','how','what')}))+'</article>'
-    if not lit:lit_text+='<p class="meta">本次渲染未提供 3W 提取记录；不补写文献结论。</p>'
-    lit_text+=fold('缺失全文／补充材料记录',value_html(literature.get('source_gaps',[])))
-    section('literature','02 / LITERATURE','文献理解 · 3W',lit_text)
-    stages=comparison.get('stages',[])
-    stage_text=harness_diagram()
-    stage_text+=table(['阶段','实际执行','文档检查','相对基线参数变化'],[[esc(stage.get('label','')),value_html(stage.get('executed')),value_html(stage.get('assessment',{}).get('valid')),str(len(stage.get('parameter_changes',[])))] for stage in stages]) if stages else '<p class="meta">没有提供阶段执行记录。</p>'
-    stage_text+='<p class="meta">变化数仅统计参数差异。规则、实验或说明可有修改；参数未改变不等于阶段未运行。</p>'
-    stage_details=''
-    for stage in stages:
-        changes=stage.get('parameter_changes',[])
-        body=table(['参数','基线','该阶段'],[[esc(c.get('parameter','')),compact(c.get('baseline')),compact(c.get('candidate'))] for c in changes]) if changes else '<p>参数值未检测到变化。请结合规则和实验记录判断。</p>'
-        body+=fold('文档检查的具体结果',value_html(stage.get('assessment',{})))
-        path=Path(stage['artifact']) if stage.get('artifact') else None
-        if path and path.is_file():
-            try:
-                stage_data=read(path)
-                body+=fold('该阶段实际方法', ''.join(method_html(m,stage.get("label","stage")) for m in stage_data.get('candidate_methods',[])))
-                body+=fold('该阶段完整实验与其他字段',value_html({k:v for k,v in stage_data.items() if k!='candidate_methods'}))
-            except (OSError,ValueError,TypeError,AttributeError) as exc:body+='<p>阶段方法无法读取：'+esc(exc)+'</p>'
-        else:body+='<p>本次渲染无法读取该阶段原始方法文件。</p>'
-        stage_details+=fold(stage.get('label','阶段')+' · 参数变化与检查',body)
-    stage_text+=fold('逐阶段方法、差异和检查详情',stage_details)
-    edits=comparison.get('rule_edits',proof.get('rule_edits',[]))
-    stage_text+='<h3>规则修改与合成决定</h3>'+table(['阶段 / 维度','已执行','保留原规则','修改依据'],[[esc(e.get('label',''))+' / '+esc(e.get('dimension','')),compact(e.get('executed')),compact(e.get('kept_base')),fold('展开规则修改原文',compact(e.get('notes')))] for e in edits])
-    stage_text+=fold('选择、反思与执行用量',value_html({k:proof.get(k) for k in ('selected','selector','reflection_executed','experience_saved','delivery_repair_executed','model_sessions_attempted','model_sessions_verified')})+value_html(usage or {'usage':'本次渲染未提供预算记录；未调用模型。'}))
-    section('process','03 / HARNESS² TRACE','Baseline / INV / DOM / AGG',stage_text)
-    section('methods','04 / CANDIDATE METHODS','候选合成方法','<p class="section-intro">按步骤查看参数。未确定值保持突出；引文、假设和计算藏在对应参数的“依据与计算”中。</p>'+''.join(method_html(m) for m in data.get('candidate_methods',[])))
-    exps=data.get('validation_experiments',[])
-    experiments=table(['实验','检验的假设','独立批次 / 技术重复','读出指标'],[[esc(e.get('id','')),compact(e.get('hypothesis')),compact(e.get('independent_batches'))+' / '+compact(e.get('technical_repeats')),compact([r.get('metric','') for r in e.get('readouts',[])])] for e in exps])
-    experiments+='<div class="decision-map" role="group" aria-label="验证判断流程"><div class="decision-start">提出假设 → 设置对照与采样 → 测量读出 → 按预先约定的条件判断</div><div class="decision-branches"><p><b>符合接受条件</b><span>按该实验的结果分支决定下一步；不能直接宣称方法有效。</span></p><p><b>触发可证伪条件</b><span>按该实验记录，停止、修正或排除相关假设。</span></p><p><b>证据不足／无法区分</b><span>保留未确定状态，检查测定与缺失条件。</span></p></div></div>'
-    experiments+='<p class="meta">批次与技术重复不能互换。下表的试验安排与接受条件是待验证设计，不是已得到的结果。实验间的先后依赖以各自条件为准。</p>'
-    for e in exps:
-        body='<h4>如何做</h4>'+table(['设计项目','内容'],[[esc(label),compact(e.get(key))] for key,label in [('method_ids','对应方法'),('uncertainty_ids','对应未知事项'),('controls','对照'),('sampling','采样'),('sample_size_rationale','批次与重复数依据')]])
-        body+='<h4>看什么、怎样判断</h4>'+table(['指标','方法 / 单位','接受条件','条件依据'],[[compact(r.get('metric')),compact(r.get('method'))+' / '+compact(r.get('unit')),compact(r.get('acceptance')),compact(r.get('acceptance_basis'))] for r in e.get('readouts',[])])
-        body+=table(['结果判断','行动依据'],[[esc(label),compact(e.get(key))] for key,label in [('predicted_result','预期结果'),('falsification','可证伪条件'),('decision_rule','通过／失败／不确定时的行动')]])
-        extra={k:v for k,v in e.items() if k not in ('id','method_ids','uncertainty_ids','controls','sampling','sample_size_rationale','readouts','predicted_result','falsification','decision_rule','hypothesis','independent_batches','technical_repeats')}
-        if extra:body+=fold('补充字段',value_html(extra))
-        experiments+=fold(e.get('id','实验')+' · 对照、采样、接受条件与结果分支',body)
-    section('experiments','05 / DISCRIMINATING EXPERIMENTS','最小验证实验',experiments)
-    constraints=table(['约束','状态','原因'],[[esc(c.get('id','')),compact(c.get('status')),compact(c.get('reason'))] for c in data.get('constraint_assessments',[])])
-    unknowns=table(['未知事项','重要性','需要回答的问题'],[[esc(u.get('id','')),compact(u.get('importance')),compact(u.get('question'))] for u in data.get('uncertainties',[])])
-    section('unknowns','06 / OPEN QUESTIONS','约束与未确定事项','<h3>哪些条件尚未满足</h3>'+constraints+'<h3>哪些问题需要实验回答</h3>'+unknowns)
-    sources=table(['来源','访问范围','详细记录'],[[('<a href="'+esc(safe_url(d.get('url','')))+'" rel="noreferrer">'+esc(d.get('id','')+' · '+d.get('title',''))+'</a>') if safe_url(d.get('url','')) else esc(d.get('id','')+' · '+d.get('title','')),compact(d.get('access')),fold('DOI、来源与登记信息',value_html({k:v for k,v in d.items() if k not in ('title','url')}))] for d in registry.get('documents',[])])
-    sources+='<p>文档检查：<strong>'+('通过' if result['valid'] else '未通过')+'</strong>。科学有效性：'+esc(result.get('scientific_validity','未实验验证'))+'。</p>'+fold('完整文档检查与错误记录',value_html(result))
-    section('sources','07 / PROVENANCE','来源与检查',sources)
-    snapshot=esc(datetime.now(timezone.utc).isoformat(timespec='seconds'))
-    digest=hashlib.sha256(Path(artifact).read_bytes()).hexdigest()
-    title=esc(data.get('material','Biomaterial'))
-    nav=''.join('<li><a href="#'+anchor+'">'+str(i).zfill(2)+' / '+label+'</a></li>' for i,(anchor,label,_) in enumerate(sections,1))
-    document='<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>'+title+' · RobinBioMethod</title><style>'+CSS+'</style></head><body><a class="skip" href="#main">跳到报告正文</a><div class="shell"><nav aria-label="报告目录"><div class="brand">Robin<i>BioMethod</i></div><small>Research method dossier</small><ol>'+nav+'</ol><p class="note">单文件 · 离线阅读<br>浏览器打印可保存为 PDF<br>无需联网、脚本或额外技能</p></nav><main id="main"><header><span class="eyebrow">LITERATURE → METHOD → VALIDATION PLAN</span><h1>'+title+'<br><span>从证据到候选方法</span></h1><p class="lead">候选合成方法、最小验证实验与可追溯的推理过程。</p><span class="stamp'+('' if verified else ' warn')+'">'+state+'</span><p class="meta">方法状态：'+esc(data.get('status','未确定'))+' · 文档检查：'+('通过' if result['valid'] else '未通过')+'</p><div class="notice"><strong>研究边界</strong><br>计算流程与文档检查不证明合成效果、目标达成、纯度、生物相容性、实验安全性或可重复性。未知条件和提出的实验阈值需要人工审阅与实验确认。</div></header>'+''.join(s[2] for s in sections)+'<footer>RobinBioMethod · Evidence-grounded method design<br>生成时间（UTC）：'+snapshot+'<br>方法快照 SHA-256：<code>'+digest+'</code><br>本页面由结构化结果确定性生成；原始 JSON、Markdown 与执行审计保留。HTML 排版不增加模型调用。</footer></main></div></body></html>'
-    out.parent.mkdir(parents=True,exist_ok=True);out.write_text(document,encoding='utf-8')
-    return result
+    brief=R.table([L('目标','Target'),L('允许偏差','Tolerance'),L('规模','Scale'),L('检测方式','Assay')],[[v(target.get('value'))+' '+R.text(target.get('unit','')),v(target.get('tolerance')),v(scale.get('value'))+' '+R.text(scale.get('unit','')),v(target.get('assay'))]])
+    brief+='<div class="finding"><span class="eyebrow">'+L('当前判断','Current assessment')+'</span><p>'+v(data.get('target_assessment',{}).get('reason'))+'</p></div>'
+    brief+=R.fold(L('完整目标、约束、假设与证据边界','Full aim, constraints, assumptions and evidence limits'),v(goal)+v(data.get('evidence_limitations',[])))
+    add('brief',L('目标与边界','Aim and boundaries'),brief)
+    lit=''
+    overview=pack.get('material_overview',{}).get(language)
+    if overview:lit+='<p>'+esc(overview)+'</p>'
+    for entry in literature.get('literature_review',[]):
+        lit+='<article><h3>'+R.text(entry.get('document',''))+'</h3>'+R.table([L('问题','Question'),L('文献理解','Literature understanding')],[[L(zh,en),v(entry.get(key))] for key,zh,en in [('why','为什么相关','Why relevant'),('how','采用什么方法','How conducted'),('what','结果与适用边界','Findings and applicability')]])
+        lit+=R.fold(L('原文引句与定位（保留原文）','Original quotations and locators'),v(entry.get('method_evidence',[])))+'</article>'
+    if not lit:lit='<p>'+L('没有提供文献提取记录；不补写综述结论。','No literature extraction supplied; no review conclusions are invented.')+'</p>'
+    lit+=R.fold(L('缺失来源与补充材料','Missing sources and supplements'),v(literature.get('source_gaps',[])))
+    add('literature',L('文献理解','Literature understanding'),lit)
+    methods='<p>'+L('以下是待验证的候选方法。流程图说明步骤之间的顺序及准入条件；不是已执行的实验结果。','The following methods are candidates for validation. The flowchart shows sequence and readiness gates, not completed laboratory results.')+'</p>'
+    methods+=''.join(R.method(m) for m in data.get('candidate_methods',[]))
+    methods+='<div id="'+R.prefix+'process">'+R.fold(L('候选方法如何形成：Baseline / INV / DOM / AGG','How the candidate was developed: Baseline / INV / DOM / AGG'),R.trace(proof,comparison))+'</div>'
+    add('methods',L('候选合成方法','Candidate synthesis method'),methods)
+    unknowns=R.table([L('未知事项','Open question'),L('重要性','Importance'),L('需要回答的问题','Question to resolve')],[[esc(u.get('id','')),v(u.get('importance')),v(u.get('question'))] for u in data.get('uncertainties',[])])
+    unknowns+=R.fold(L('目标约束核对','Constraint assessments'),R.table([L('约束','Constraint'),L('状态','Status'),L('判断依据','Rationale')],[[esc(c.get('id','')),v(c.get('status')),v(c.get('reason'))] for c in data.get('constraint_assessments',[])]))
+    add('unknowns',L('尚未确定什么','What remains unresolved'),unknowns)
+    experiments=''
+    roadmap=pack.get('experiment_roadmap',[])
+    if roadmap:
+        experiments+='<div class="experiment-roadmap"><ol>'
+        for entry in roadmap:
+            item=entry.get(language,{})
+            experiments+='<li><b>'+esc(entry.get('id',''))+' · '+esc(item.get('label',''))+'</b></li>'
+        experiments+='</ol><p class="gate-note">'+L('此顺序来自当前实验设计；后续阶段须满足各自前置条件。','This sequence comes from the present experimental design; later stages retain their stated prerequisites.')+'</p></div>'
+    rows=[]
+    for e in data.get('validation_experiments',[]):
+        summary=next((x.get(language,{}) for x in roadmap if x.get('id')==e.get('id')), {})
+        rows.append([esc(e.get('id','')),esc(summary['label']) if summary.get('label') else v(e.get('hypothesis')),v([r.get('metric','') for r in e.get('readouts',[])]),esc(summary['resolves']) if summary.get('resolves') else v(e.get('uncertainty_ids',[])),v(e.get('independent_batches'))+' / '+v(e.get('technical_repeats'))])
+    experiments+=R.table([L('实验','Experiment'),L('验证什么','What it tests'),L('检测什么','What to measure'),L('完成后能明确什么','What it can resolve'),L('计划批次 / 技术重复','Planned batches / technical repeats')],rows)
+    experiments+='<p class="meta">'+L('这些是计划值，并非已完成实验。技术重复不等于独立合成批次；实验阈值须按各自的依据解释。','These are planned counts, not completed experiments. Technical repeats are not independent synthesis batches; interpret thresholds according to their stated basis.')+'</p>'
+    for e in data.get('validation_experiments',[]):
+        body='<h4>'+L('待检验假设与设计','Hypothesis and design')+'</h4>'+v({k:e.get(k) for k in ('hypothesis','method_ids','uncertainty_ids','controls','sampling','sample_size_rationale')})
+        body+='<h4>'+L('检测与接受条件','Readouts and acceptance conditions')+'</h4>'+R.table([L('指标','Metric'),L('检测方式 / 单位','Method / unit'),L('接受条件','Acceptance'),L('条件依据','Basis')],[[v(r.get('metric')),v(r.get('method'))+' / '+v(r.get('unit')),v(r.get('acceptance')),v(r.get('acceptance_basis'))] for r in e.get('readouts',[])])
+        body+=R.table([L('判断','Decision'),L('内容','Content')],[[L(zh,en),v(e.get(k))] for k,zh,en in [('predicted_result','预期结果','Expected result'),('falsification','可证伪条件','Falsification'),('decision_rule','通过／失败／无法判断时的行动','Pass / fail / inconclusive actions')]])
+        experiments+=R.fold(e.get('id','')+' · '+L('对照、采样、接受条件与结果分支','Controls, sampling, acceptance and decisions'),body)
+    add('experiments',L('最小验证实验','Minimal validation experiments'),experiments)
+    profiles={r.get('id'):r for r in references.get('documents',[])};refs=''
+    for doc in registry.get('documents',[]):
+        meta=profiles.get(doc['id'],{});url=safe_url(doc.get('url',''));title=esc(doc.get('title',''))
+        refs+='<article class="reference-assessment"><h3>'+esc(doc['id'])+' · '+(('<a href="'+esc(url)+'">'+title+'</a>') if url else title)+'</h3>'
+        bibliography=R.table([L('期刊','Journal'),L('年份','Year'),L('引用次数','Citation count'),L('数据来源 / 获取时间','Provider / retrieved at')],[[esc(meta.get('journal') or L('未获取','Not retrieved')),esc(meta.get('year') or L('未获取','Not retrieved')),v(meta.get('citation_count')),esc(meta.get('provider','Europe PMC'))+' / '+esc(meta.get('retrieved_at') or L('未获取','Not retrieved'))]])
+        refs+=bibliography
+        assessment_rows=[(L('全文可追溯性','Full-text traceability'),L('已登记全文，可核对原文引句；不等同于科学结论已复核。','Full text is registered and quotations can be checked; this does not certify scientific conclusions.')) if doc.get('access') in ('full_text','fulltext','fulltext_unreviewed') else (L('来源访问范围','Source access'),R.strings.get(str(doc.get('access')),str(doc.get('access'))) if language=='zh' else str(doc.get('access')))]
+        for row in pack.get('reference_assessments',{}).get(doc['id'],[]):
+            entry=row.get(language,{})
+            assessment_rows.append((entry.get('dimension',''),entry.get('finding','')))
+        assessment_rows.append((L('独立复现','Independent replication'),L('尚未核验引用论文是否实际复现本方法，不能据引用数判为高可信。','Citing papers have not been checked for actual replication; citation counts do not establish high method confidence.')))
+        assessment_rows.append((L('对本任务目标的支持','Support for this task target'),L('详见第一部分的目标判断；文献影响力不能替代目标相关的直接证据。','See the task assessment in Aim; scholarly influence cannot replace target-specific direct evidence.')))
+        refs+=R.table([L('证据维度','Evidence dimension'),L('评价与边界','Assessment and limits')],[[esc(a),esc(b)] for a,b in assessment_rows])
+        metadata_url=safe_url(meta.get('query_url',''))
+        refs+=R.fold(L('文献元数据、查询依据与文档检查','Bibliographic metadata, lookup provenance and document checks'),v({k:doc.get(k) for k in ('doi','access')})+('<p>'+L('许可标记：','License: ')+esc((re.search(r'CC BY(?:-[A-Z]+)* [0-9.]+',str(doc.get('license',''))) or (['CC BY 4.0'] if 'creativecommons.org/licenses/by/4.0' in str(doc.get('license','')) else ['未明确']))[0])+'</p>' if language=='zh' else v({'license':doc.get('license')}))+('<p><a href="'+esc(metadata_url)+'">'+L('查看引用量查询来源','View citation-count lookup')+'</a></p>' if metadata_url else '')+('<p>'+esc(meta.get('error',''))+'</p>' if language=='en' else '')+('<p>'+L('文档检查通过。其检查的是结构、算术和引用，不证明实验有效。','Document checks passed; they check structure, arithmetic and provenance, not experimental validity.')+'</p>' if assessment.get('valid') else '<p>'+L('文档检查未通过。','Document checks failed.')+'</p>')+(R.fold('Full machine check',v(assessment)) if language=='en' else ''))
+        refs+='</article>'
+    refs+='<p class="source-principle">'+L('引用次数反映传播与使用背景，不等于独立复现次数。期刊或影响因子不能替代对方法本身、适用条件和实验结果的审查。','Citation counts indicate scholarly attention, not independent replications. Journal metrics cannot replace assessment of a method, its conditions and experimental results.')+' <a href="https://sfdora.org/read/">'+L('评价原则参考','Assessment principles')+' · DORA</a></p>'
+    add('sources',L('参考文献与证据评价','References and evidence assessment'),refs)
+    nav=''.join('<li>'+R.link(a,str(i).zfill(2)+' / '+title)+'</li>' for i,(a,title,_) in enumerate(sections,1))
+    state=L('核心执行证据已核验','Core execution evidence verified') if proof.get('verified') is True else L('未完成全流程核验 / 仅文档呈现','Full workflow unverified / document presentation only')
+    material=esc(data.get('material','Biomaterial'))
+    heading=material+L(' 合成方法',' synthesis method')
+    boundary=L('候选方法尚未经过本任务的湿实验验证；不证明目标达成、纯度、生物相容性、实验安全性或可重复性。','This candidate has not undergone wet-lab validation in this task. It does not establish target attainment, purity, biocompatibility, operational safety or reproducibility.')
+    footer=L('方法文件校验值','Method artifact SHA-256')+': <code>'+artifact_hash+'</code>'
+    return '<div class="report report-'+language+'" lang="'+('zh-CN' if language=='zh' else 'en')+'"><a class="skip" href="#'+R.prefix+'main">'+L('跳到正文','Skip to report')+'</a><div class="shell"><nav aria-label="'+L('报告目录','Report contents')+'"><ol>'+nav+'</ol><p class="note">'+L('支撑材料按需展开。<br>单文件，支持离线阅读。','Expand supporting material as needed.<br>Single file; readable offline.')+'</p></nav><main id="'+R.prefix+'main"><header><h1>'+heading+'</h1><p class="meta">'+L('方法状态：','Method status: ')+R.text(data.get('status',''))+'</p><span class="stamp'+('' if proof.get('verified') else ' warn')+'">'+state+'</span><div class="notice">'+boundary+'</div></header>'+''.join(s[2] for s in sections)+'<footer>'+footer+'</footer></main></div></div>'
 
 
-def render_job_report(job, proof=None):
-    """Render saved outputs only; never start/retry/charge a model session."""
-    job=Path(job)
-    run=job/'harness' if (job/'harness').is_dir() else job
-    source=run/'frozen/source'
+def render_html(source,artifact,out,*,proof=None,comparison=None,literature=None,usage=None,localization=None,references=None):
+    source=Path(source);out=Path(out);data=read(artifact);goal=read(source/'goal.json');registry=read(source/'registry.json')
+    assessment=assess(source,Path(artifact));literature=literature or {};proof=proof or {};comparison=comparison or {};references=references or {}
+    pack=localization or {};translated=False
+    if localization is not None:
+        validate_localization(pack,report_payload(goal,data,literature));translated=True
+    if pack.get('rule_summaries'):
+        rule_hash=hashlib.sha256(json.dumps(comparison.get('rule_edits',proof.get('rule_edits',[])),sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+        if pack.get('rule_hash')!=rule_hash:raise ValueError('Translated rule summaries do not match execution records.')
+    en=_article('en',pack,goal,data,literature,registry,proof,comparison,usage,assessment,references,hashlib.sha256(Path(artifact).read_bytes()).hexdigest())
+    zh=_article('zh',pack,goal,data,literature,registry,proof,comparison,usage,assessment,references,hashlib.sha256(Path(artifact).read_bytes()).hexdigest()) if translated else ''
+    # Native radio controls keep the report offline and script-free. Each panel declares its own lang.
+    source_is_english=not any(re.search(r'[\u3400-\u9fff]',text) for text in required_strings(report_payload(goal,data,literature)))
+    controls='<input class="language-control" type="radio" id="lang-zh" name="report-language"'+(' checked' if translated else ' disabled')+'><input class="language-control" type="radio" id="lang-en" name="report-language"'+('' if translated else ' checked')+'><div class="language-bar"><span class="brand">RobinBioMethod</span><div class="language-options" role="group" aria-label="Language / 语言"><label for="lang-zh"'+('' if translated else ' class="unavailable" title="Chinese translation has not been prepared"')+'>中文</label><label for="lang-en">'+('English' if translated or source_is_english else 'Source / 原文')+'</label></div></div>'
+    pending='' if translated else '<p class="notice">'+('Chinese translation is not prepared. This is the English report; translated headings alone are not presented as a Chinese edition.' if source_is_english else 'Language editions are not prepared. This is an untranslated source view, not a fully English or Chinese edition.')+'</p>'
+    html='<!doctype html><html lang="'+('zh-CN' if translated else 'en')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;"><title>'+esc(data.get('material','Biomaterial'))+' · RobinBioMethod</title><style>'+CSS+'</style></head><body>'+controls+pending+zh+en+'</body></html>'
+    out.parent.mkdir(parents=True,exist_ok=True);out.write_text(html,encoding='utf-8')
+    return dict(assessment,report_languages=['zh','en'] if translated else ['source'],localization_complete=translated)
+
+
+def _saved(job,proof=None):
+    job=Path(job);run=job/'harness' if (job/'harness').is_dir() else job
     if proof is None:
         from .execution import execution_evidence
         proof=execution_evidence(run,job/'budget.json' if (job/'budget.json').exists() else None,job/'audit' if (job/'audit').exists() else None)
     artifact=proof.get('delivery_artifact')
-    if not artifact or not Path(artifact).is_file():
-        raise ValueError('No readable delivery artifact; HTML rendering cannot substitute a missing method.')
+    if not artifact or not Path(artifact).is_file():raise ValueError('No readable delivery artifact; HTML cannot substitute a missing method.')
+    return job,run,proof,Path(artifact)
+
+
+def export_report_texts(job,out):
+    job,run,proof,artifact=_saved(job)
+    literature=read(job/'extraction.json') if (job/'extraction.json').exists() else {}
+    payload=report_payload(read(run/'frozen/source/goal.json'),read(artifact),literature)
+    from robinharness.runtime import dump
+    result=dict(schema_version=1,source_hash=content_hash(payload),zh={text:None for text in required_strings(payload)},en={text:None for text in required_strings(payload) if re.search(r'[\u3400-\u9fff]',text)})
+    dump(Path(out),result);return dict(status='translation_template_exported',out=str(out),strings=len(result['zh']),model_calls=0)
+
+
+def render_job_report(job,proof=None,localization=None):
+    job,run,proof,artifact=_saved(job,proof)
     comparison=read(run/'stage-comparison.json') if (run/'stage-comparison.json').exists() else {}
-    extraction=read(job/'extraction.json') if (job/'extraction.json').exists() else {}
-    budget=read(job/'budget.json') if (job/'budget.json').exists() else {}
-    sessions=budget.get('sessions',[])
-    usage=dict(scope='This job budget only; previous attempts and separately authorized checks are not silently combined.',recorded_sessions=len(sessions),max_sessions=budget.get('max_sessions'),cost_usd=None,
-               tokens={key:sum(s.get('usage',{}).get(key,0) for s in sessions) for key in ('input_tokens','cached_input_tokens','output_tokens','reasoning_output_tokens')}) if budget else None
-    render_html(source,Path(artifact),job/'report.html',proof=proof,comparison=comparison,literature=extraction,usage=usage)
+    literature=read(job/'extraction.json') if (job/'extraction.json').exists() else {}
+    language_path=Path(localization) if localization else job/'report-localization.json'
+    pack=read(language_path) if language_path.exists() else None
+    refs=read(job/'reference-profile.json') if (job/'reference-profile.json').exists() else {}
+    result=render_html(run/'frozen/source',artifact,job/'report.html',proof=proof,comparison=comparison,literature=literature,localization=pack,references=refs)
+    from robinharness.runtime import dump
+    dump(job/'report-presentation.json',dict(languages=result['report_languages'],localization_complete=result['localization_complete'],method_sha256=hashlib.sha256(artifact.read_bytes()).hexdigest(),reference_metadata_cached=bool(refs),model_calls=0))
     return job/'report.html'

@@ -36,7 +36,8 @@ def main(argv=None):
         command.add_argument('--model')
     resume=sub.add_parser('resume-final');resume.add_argument('job',type=Path);resume.add_argument('--minutes',type=float,required=True);resume.add_argument('--extra-minutes',type=float,default=0);resume.add_argument('--reuse-partial',action='store_true')
     repair=sub.add_parser('repair-delivery');repair.add_argument('job',type=Path)
-    html=sub.add_parser('html-report',help='Render saved results as offline HTML; zero model calls');html.add_argument('job',type=Path)
+    html=sub.add_parser('html-report',help='Render saved results as offline HTML; zero model calls');html.add_argument('job',type=Path);html.add_argument('--localization',type=Path);html.add_argument('--refresh-references',action='store_true')
+    texts=sub.add_parser('report-texts');texts.add_argument('job',type=Path);texts.add_argument('--out',type=Path,required=True)
     status=sub.add_parser('status');status.add_argument('job',type=Path)
     evidence=sub.add_parser('evidence');evidence.add_argument('run_dir',type=Path)
     s=sub.add_parser('search');s.add_argument('--query',required=True);s.add_argument('--provider',choices=['europepmc','pubmed'],default='europepmc');s.add_argument('--limit',type=int,default=8);s.add_argument('--out',type=Path,required=True)
@@ -69,8 +70,15 @@ def main(argv=None):
             out=repair_delivery(args.job)
         elif args.command=='html-report':
             from .html_report import render_job_report
-            report=render_job_report(args.job)
-            out=dict(status='rendered',html_report=str(report),model_calls=0)
+            if args.refresh_references:
+                from .reference_profile import refresh_references
+                run=args.job/'harness' if (args.job/'harness').is_dir() else args.job
+                refresh_references(run/'frozen/source',args.job/'reference-profile.json')
+            report=render_job_report(args.job,localization=args.localization)
+            out=dict(status='rendered',html_report=str(report),**read(args.job/'report-presentation.json'))
+        elif args.command=='report-texts':
+            from .html_report import export_report_texts
+            out=export_report_texts(args.job,args.out)
         elif args.command=='status':out=job_status(args.job)
         elif args.command=='evidence':out=export_execution(args.run_dir)
         elif args.command=='doctor':

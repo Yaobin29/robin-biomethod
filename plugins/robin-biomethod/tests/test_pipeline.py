@@ -147,8 +147,13 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue((self.root/'job/literature-review.md').exists())
         self.assertTrue((self.root/'job/candidate-method.md').exists())
         html=(self.root/'job/report.html').read_text()
-        self.assertIn('fixture relevance',html);self.assertIn('最小验证实验',html)
+        self.assertIn('fixture relevance',html);self.assertIn('Minimal validation experiments',html)
         self.assertEqual(Path(r['html_report']).resolve(),(self.root/'job/report.html').resolve())
+        from biomethod.cli import main
+        import contextlib,io
+        stream=io.StringIO()
+        with contextlib.redirect_stdout(stream):self.assertEqual(main(['html-report',str(self.root/'job')]),0)
+        self.assertEqual(json.loads(stream.getvalue())['model_calls'],0)
         artifact=Path(proof['stages'][0]['artifact']);original=artifact.read_text()
         artifact.write_text(original+' ')
         self.assertFalse(execution_evidence(run,bp,ad)['verified'])

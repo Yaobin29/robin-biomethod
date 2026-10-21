@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 — 2026-10-21
+
+- Article order: Aim, literature, candidate method, open questions, experiments, references.
+- Named synthesis flowchart with source parameters, visible unknowns and step links.
+- Source-bound Chinese/English content panels and native offline language controls.
+- Translation templates, numeric/coverage/staleness guards and honest source-only fallback.
+- Host-prepared translations; no implicit model call or scientific-budget restart.
+- Dated optional Europe PMC metadata; citation influence distinguished from replication.
+- Original English stage archive retained; Chinese rule summaries bound to execution edits.
+- 112 local regression tests; live HAMA bilingual rendering and language-content checks.
+
 ## 0.2.2 — 2026-10-21
 
 - Replaced recursive field dumps in the main HTML body with section-specific layouts.
