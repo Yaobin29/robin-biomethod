@@ -57,6 +57,18 @@ once basic setup is checked; do not remain in setup-only mode.
    harness/execution-evidence.json says verified=true. Inspect them, don't quote filenames
    whose contents were not checked. A zero-session result is never real Harness2 execution.
 
+## Scientific quality gate
+
+After a verified final method is selected, the controller runs a separate deterministic
+scientific SOP lint and saves `scientific-lint.json`. Read that file before presenting a
+candidate. Report its status and findings separately from Harness2 execution verification.
+`candidate_for_human_review` is **not** a lab-ready SOP; `unresolved_draft` means key
+conditions require resolution. A machine-check error prevents full delivery. Do not
+silently change the selected method to clear a lint warning. See
+../../references/scientific-lint-rules.md for rule scope and human-only questions.
+For an already prepared task, `lint-sop --task TASK --artifact METHOD --out lint.json`
+checks a candidate without model calls or experimental authorization.
+
 ## Required visible delivery
 
 - Verified 3W literature review and source/locator evidence, with missing supplements flagged.
