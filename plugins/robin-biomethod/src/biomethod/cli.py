@@ -11,6 +11,7 @@ from . import __version__
 from .research import search, collect, import_document, merge_collections
 from .workflow import prepare, read, validate_task_source, PLUGIN
 from .validation import assess
+from .scientific_lint import lint_candidate
 from .reporting import render, compare
 from .pipeline import run_design, settings, configure, job_status
 from .execution import export_execution
@@ -48,6 +49,7 @@ def main(argv=None):
     for flag in ('goal','bundle','methods','out'):q.add_argument('--'+flag,type=Path,required=True)
     q.add_argument('--profile',type=Path)
     a=sub.add_parser('assess');a.add_argument('--task',type=Path,required=True);a.add_argument('--artifact',type=Path,required=True)
+    l=sub.add_parser('lint-sop');l.add_argument('--task',type=Path,required=True);l.add_argument('--artifact',type=Path,required=True);l.add_argument('--out',type=Path)
     a=sub.add_parser('render');a.add_argument('--task',type=Path,required=True);a.add_argument('--artifact',type=Path,required=True);a.add_argument('--out',type=Path,required=True)
     c=sub.add_parser('compare');c.add_argument('--task',type=Path,required=True);c.add_argument('--artifact',action='append',type=Path,required=True);c.add_argument('--out',type=Path,required=True)
     d=sub.add_parser('demo');d.add_argument('--out',type=Path,required=True)
@@ -90,10 +92,13 @@ def main(argv=None):
         elif args.command=='import':out=import_document(args.input,args.out,args.id,args.title,args.url,args.doi,args.license)
         elif args.command=='merge':out=merge_collections(args.bundle,args.out)
         elif args.command=='prepare':out=prepare(args.goal,args.bundle,args.methods,args.out,args.profile)
-        elif args.command in ('assess','render','compare'):
+        elif args.command in ('assess','render','compare','lint-sop'):
             task=read(args.task)
             source=args.task.parent / task['source_dir']
             if args.command=='assess':out=assess(source,args.artifact)
+            elif args.command=='lint-sop':
+                out=lint_candidate(source,args.artifact)
+                if args.out:dump(args.out,out)
             elif args.command=='render':out=render(source,args.artifact,args.out)
             else:out=compare(source,[(str(i),a) for i,a in enumerate(args.artifact)],args.out)
         elif args.command=='demo':
