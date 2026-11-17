@@ -80,6 +80,8 @@ checks a candidate without model calls or experimental authorization.
   stage comparison, candidate methods, minimal experiments, unknowns and sources. Keep
   candidate-method.md, execution-report.md, stage-comparison.json, execution-evidence.json,
   actual session/token accounting and unmet scientific uncertainties.
+- Scientific Lint: read scientific-lint.json; report hard errors and outstanding
+  experimental-design questions without claiming that a passing gate is lab approval.
 - Minimal experiments: controls, independent synthesis batches vs technical repeats,
   qualified readouts, predictions, falsification and pass/fail/inconclusive actions.
 
