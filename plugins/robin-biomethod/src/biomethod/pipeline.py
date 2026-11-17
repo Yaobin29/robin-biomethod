@@ -15,6 +15,7 @@ from robinharness.cli import optimize
 from .research import search,collect,merge_collections,now
 from .workflow import PLUGIN,read,validate_goal,source_index,prepare
 from .execution import export_execution
+from .scientific_lint import lint_goal, save_job_lint
 
 DEFAULTS=dict(session_limit=16,minutes=45,k=1,model='codex-default',search_limit=8,max_sources=3)
 STAGES=('intake','discovery','screening','full_text','method_extraction','freeze','harness2','delivery')
@@ -132,6 +133,7 @@ def run_design(goal_path,*,queries=None,bundle=None,run_dir=None,overrides=None,
     root.mkdir(parents=True,exist_ok=False)
     journal=Journal(root,cfg);budget=Budget(root/'budget.json',cfg['session_limit'],cfg['minutes'])
     dump(root/'goal.json',goal)
+    dump(root/'intake-lint.json',lint_goal(goal))
     dump(root/'request.json',dict(goal_sha256=hashlib.sha256((root/'goal.json').read_bytes()).hexdigest(),queries=queries or [],provided_bundle=bool(bundle),settings=cfg))
     runner=None
     try:
@@ -211,7 +213,8 @@ def run_design(goal_path,*,queries=None,bundle=None,run_dir=None,overrides=None,
         journal.data['cost_usd']=None;journal.save()
     return dict(status=journal.data['status'],workflow_complete=journal.data['workflow_complete'],harness2_executed=journal.data['harness2_executed'],
                 job=str(root),workflow=str(root/'workflow.json'),html_report=str(root/'report.html') if (root/'report.html').exists() else None,method=str(root/'candidate-method.md') if (root/'candidate-method.md').exists() else None,
-                model_sessions_attempted=journal.data['model_sessions_attempted'],errors=journal.data['errors'])
+                model_sessions_attempted=journal.data['model_sessions_attempted'],
+                scientific_lint=journal.data.get('scientific_lint'),errors=journal.data['errors'])
 
 def finish_core(root,journal,budget,runner,cfg):
     remaining=len(budget.data['sessions'])+7*cfg['k']+1+int(cfg['k']>1)
@@ -232,6 +235,11 @@ def finish_core(root,journal,budget,runner,cfg):
         raise ValueError('Full Harness2 completion not verified; inspect harness/execution-evidence.json and stage outputs. '+ '; '.join(report.get('errors',[])+failures))
     journal.step('harness2','completed',evidence='harness/execution-evidence.json')
     journal.step('delivery','running')
+    quality=save_job_lint(root,proof)
+    journal.data['scientific_lint']=dict(status=quality['status'],report='scientific-lint.json',laboratory_authorized=False)
+    journal.save()
+    if not quality['valid']:
+        raise ValueError('Scientific SOP lint found machine-check failures; inspect scientific-lint.json. Original method remains unchanged.')
     write_literature_review(root)
     for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json','report.html'):
         shutil.copy2(harness/name,root/name)

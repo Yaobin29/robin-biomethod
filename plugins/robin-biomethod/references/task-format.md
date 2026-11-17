@@ -31,6 +31,19 @@ paper's condition cannot be labeled as this route's reported condition. Method c
 are human/host extracted inputs and require source review; no automatic extraction
 model is hidden inside preparation.
 
+## Experimental design and SOP lint
+
+To inspect a prepared candidate separately from the existing evidence/contract
+`assess` command, run:
+
+    python3 scripts/biomethod.py lint-sop --task task/task.json \
+      --artifact method.json --out scientific-lint.json
+
+This emits machine findings, remaining unresolved prerequisites and questions for
+scientific/safety review. It cannot certify lab readiness or chemical validity.
+The standard `design` workflow writes `intake-lint.json` and
+`scientific-lint.json` automatically when final provenance is verified.
+
 ## Preparation and output
 
     python3 scripts/biomethod.py prepare --goal goal.json --bundle evidence \

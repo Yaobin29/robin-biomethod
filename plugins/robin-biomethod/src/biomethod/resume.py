@@ -93,6 +93,10 @@ def resume_final(job,*,minutes,runner_factory=None,extra_minutes=0,reuse_partial
             shutil.copytree(run/'stage-methods',job/'stage-methods',dirs_exist_ok=True);write_literature_review(job)
             from .html_report import render_job_report
             render_job_report(job,proof)
+        from .scientific_lint import save_job_lint
+        scientific_lint=save_job_lint(job,proof)
+        if not scientific_lint['valid']:
+            raise ValueError('Scientific SOP lint failed after resume; inspect scientific-lint.json.')
         workflow=read(job/'workflow.json');workflow.update(status='completed',workflow_complete=True,harness2_executed=True,errors=[],current_stage='delivery')
         workflow['stages']['harness2']=dict(state='completed',mode='native-final-recovery')
         workflow['stages']['delivery']=dict(state='completed');workflow['updated']=now();dump(job/'workflow.json',workflow)

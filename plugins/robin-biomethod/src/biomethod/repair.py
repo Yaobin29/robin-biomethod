@@ -89,6 +89,10 @@ fields are allowed. The controller applies this patch to the immutable draft and
          scope='post-core contract repair; original stage output retained'))
     proof=export_execution(run,job/'budget.json',job/'audit')
     if not proof['verified']:raise ValueError('Delivery repair transport or provenance not verified.')
+    from .scientific_lint import save_job_lint
+    scientific_lint=save_job_lint(job,proof)
+    if not scientific_lint['valid']:
+        raise ValueError('Scientific SOP lint failed after delivery repair; inspect scientific-lint.json.')
     for name in ('candidate-method.md','execution-report.md','stage-comparison.json','execution-evidence.json','report.html'):
         shutil.copy2(run/name,job/name)
     shutil.copytree(run/'stage-methods',job/'stage-methods',dirs_exist_ok=True)
