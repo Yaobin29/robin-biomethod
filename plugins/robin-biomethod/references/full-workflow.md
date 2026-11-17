@@ -114,6 +114,15 @@ new worker must still complete a real call; a timeout draft alone cannot qualify
 continuation retains a numbered checkpoint history. Timeout partials have incomplete
 receipts and cannot be counted as completed stages.
 
+## Candidate SOP scientific lint
+
+The controller writes `intake-lint.json` after goal validation, then writes
+`scientific-lint.json` after verified selection, before final delivery. The final
+report must expose any unresolved plan/SOP design concerns. Structural failures in
+Scientific Lint stop the completed-delivery claim, without rewriting Harness2's
+frozen artifacts. Scientific judgment and laboratory release remain with qualified
+reviewers; see scientific-lint-rules.md. This check uses no extra model sessions.
+
 ## Primary readable delivery
 
 Completed jobs export a standalone offline `report.html` alongside Markdown and JSON.
