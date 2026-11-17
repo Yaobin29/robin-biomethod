@@ -213,7 +213,8 @@ def run_design(goal_path,*,queries=None,bundle=None,run_dir=None,overrides=None,
         journal.data['cost_usd']=None;journal.save()
     return dict(status=journal.data['status'],workflow_complete=journal.data['workflow_complete'],harness2_executed=journal.data['harness2_executed'],
                 job=str(root),workflow=str(root/'workflow.json'),html_report=str(root/'report.html') if (root/'report.html').exists() else None,method=str(root/'candidate-method.md') if (root/'candidate-method.md').exists() else None,
-                model_sessions_attempted=journal.data['model_sessions_attempted'],errors=journal.data['errors'])
+                model_sessions_attempted=journal.data['model_sessions_attempted'],
+                scientific_lint=journal.data.get('scientific_lint'),errors=journal.data['errors'])
 
 def finish_core(root,journal,budget,runner,cfg):
     remaining=len(budget.data['sessions'])+7*cfg['k']+1+int(cfg['k']>1)
